@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Smart Parking Entry</title>
+
+    <!-- ✅ Mobile Responsive Fix -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial;
+            background: #f4f6f8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 15px;
+        }
+
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 350px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        h2 { 
+            text-align: center; 
+        }
+
+        input, button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 10px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            font-size: 15px;
+        }
+
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        p {
+            text-align: center;
+        }
+
+        a {
+            text-decoration: none;
+            color: #333;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>🚲 Smart Parking Entry</h2>
+    <p>Scan QR → Fill → Park</p>
+
+    <form action="/submit" method="POST">
+        <input name="name" placeholder="Your Name" required>
+        <input name="phone" placeholder="Phone Number" required>
+        <input name="vehicle" placeholder="Vehicle Number" required>
+
+        <button type="submit">Get Slot</button>
+    </form>
+
+    <p style="margin-top:10px;">
+        <a href="/map">View Parking Map</a>
+    </p>
+</div>
+
+</body>
+</html>
