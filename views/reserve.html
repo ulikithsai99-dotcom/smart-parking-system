@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Staff Reservation</title>
+
+<link rel="stylesheet" href="/css/style.css">
+
+</head>
+
+<body>
+
+<div class="page">
+
+<div class="glass-card">
+
+<h1>🏢 Staff Reservation</h1>
+
+<p>Reserve a parking slot in advance</p>
+
+<form action="/reserveSlot" method="POST">
+
+<input
+type="text"
+name="employee_id"
+placeholder="Employee ID"
+required
+>
+
+<input
+type="text"
+name="name"
+placeholder="Staff Name"
+required
+>
+
+<input
+type="text"
+name="vehicle"
+placeholder="Vehicle Number"
+required
+>
+
+<input
+type="number"
+name="slot"
+placeholder="Preferred Slot"
+min="1"
+max="200"
+required
+>
+
+<button type="submit">
+Reserve Slot
+</button>
+
+</form>
+
+<div class="links">
+<a href="/user">🏠 Home</a>
+</div>
+
+</div>
+
+</div>
+
+</body>
+</html>

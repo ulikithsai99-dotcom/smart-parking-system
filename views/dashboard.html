@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Dashboard</title>
+
+<link rel="stylesheet" href="/css/style.css">
+
+<style>
+
+.dashboard{
+    display:grid;
+    grid-template-columns:260px 1fr;
+    min-height:100vh;
+}
+
+.sidebar{
+    background:rgba(255,255,255,0.08);
+    backdrop-filter:blur(15px);
+    padding:30px;
+}
+
+.sidebar h2{
+    margin-bottom:30px;
+}
+
+.sidebar a{
+    display:block;
+    color:white;
+    text-decoration:none;
+    padding:15px;
+    margin-bottom:10px;
+    border-radius:12px;
+    transition:.3s;
+}
+
+.sidebar a:hover{
+    background:rgba(255,255,255,0.1);
+}
+
+.main{
+    padding:30px;
+}
+
+.welcome{
+    margin-bottom:25px;
+}
+
+.stats-grid{
+    display:grid;
+    grid-template-columns:
+    repeat(auto-fit,minmax(220px,1fr));
+    gap:20px;
+}
+@media(max-width:768px){
+
+.dashboard{
+    grid-template-columns:1fr;
+}
+
+.sidebar{
+    margin-bottom:20px;
+}
+
+.sidebar h2{
+    text-align:center;
+}
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="dashboard">
+
+<div class="sidebar">
+
+<h2>🚗 Smart Parking</h2>
+
+<a href="/history">📜 History</a>
+
+<a href="/stats">📊 Statistics</a>
+
+<a href="/reservations">📋 Reservations</a>
+
+<a href="/map">🅿 Parking Map</a>
+
+<a href="/logout">🚪 Logout</a>
+
+</div>
+
+<div class="main">
+
+<div class="welcome">
+
+<h1>🛠 Admin Dashboard</h1>
+
+<p>Manage parking operations efficiently.</p>
+
+</div>
+
+<div class="stats-grid">
+
+<div class="stat-card">
+<h2>200</h2>
+<span>Total Slots</span>
+</div>
+
+<div class="stat-card">
+<h2>24/7</h2>
+<span>Monitoring</span>
+</div>
+
+<div class="stat-card">
+<h2>AI</h2>
+<span>Powered</span>
+</div>
+
+<div class="stat-card">
+<h2>100%</h2>
+<span>Secure</span>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Parking Map</title>
+
+<link rel="stylesheet" href="/css/style.css">
+
+<style>
+
+body{
+    padding:30px;
+}
+
+.map-card{
+    background:rgba(255,255,255,0.08);
+    backdrop-filter:blur(15px);
+    border-radius:20px;
+    padding:20px;
+    margin-bottom:20px;
+}
+
+.map-grid{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+}
+
+.slot{
+    width:60px;
+    height:60px;
+    border-radius:12px;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-weight:bold;
+    transition:.3s;
+}
+@media(max-width:768px){
+
+.slot{
+    width:45px;
+    height:45px;
+    font-size:12px;
+}
+
+.map-grid{
+    justify-content:center;
+}
+
+}
+
+.slot:hover{
+    transform:scale(1.08);
+}
+
+.red{
+    background:#ef4444;
+}
+
+.blue{
+    background:#3b82f6;
+}
+
+.green{
+    background:#22c55e;
+}
+
+.legend span{
+    padding:8px 12px;
+    border-radius:10px;
+    margin-right:10px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h1 style="text-align:center;margin-bottom:20px;">
+🅿 Smart Parking Dashboard
+</h1>
+
+{{CONTENT}}
+
+</div>
+
+</body>
+</html>
