@@ -1,48 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Vehicle Exit</title>
-
+<title>Vehicle Exit — Smart Parking</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/css/style.css">
-
 </head>
-
 <body>
-
 <div class="page">
-
-<div class="glass-card">
-
-<h1>🚪 Vehicle Exit</h1>
-
-<p>Remove a vehicle from parking</p>
-
-<form action="/exitVehicle" method="POST">
-
-<input
-type="text"
-name="vehicle"
-placeholder="Enter Vehicle Number"
-required
->
-
-<button type="submit">
-Exit Vehicle
-</button>
-
-</form>
-
-<div class="links">
-<a href="/user">🏠 Home</a>
+  <div class="glass-card">
+    <div class="icon-wrap">🚪</div>
+    <h1>Vehicle Exit</h1>
+    <p>Enter the vehicle number to release its parking slot</p>
+    <form action="/exitVehicle" method="POST">
+      <input type="text" name="vehicle" placeholder="e.g. MH12AB1234" required autocomplete="off" style="text-transform:uppercase;">
+      <button type="submit">Process Exit →</button>
+    </form>
+    <div class="links" style="margin-top:20px;">
+      <a href="/user">← User Portal</a>
+      <a href="/map">📍 Live Map</a>
+    </div>
+  </div>
 </div>
-
-</div>
-
-</div>
-
 </body>
 </html>

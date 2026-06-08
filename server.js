@@ -98,17 +98,9 @@ ORDER BY slot
   );
 }
 
-// Home
+// Home — redirect to user portal
 app.get("/", (req, res) => {
-  res.send(`
-    <h1>🚗 Smart Parking System</h1>
-
-    <a href="/user">👤 User Portal</a>
-
-    <br><br>
-
-    <a href="/admin">🔐 Admin Login</a>
-  `);
+  res.redirect("/user");
 });
 
 // User Form
@@ -744,58 +736,42 @@ app.get("/map", (req, res) => {
             ((occupiedCount / 200) * 100).toFixed(1);
 
        let slotsHtml = `
-<div class="map-card">
-<h3>Total Slots: 200</h3>
-<h3>Occupied Slots: ${occupiedCount}</h3>
-<h3>Available Slots: ${availableCount}</h3>
-<h3>Occupancy Rate: ${occupancy}%</h3>
+<div class="map-stats-row">
+  <div class="map-stat-card stat-total">
+    <div class="big num-total">200</div>
+    <div class="lbl">Total Slots</div>
+  </div>
+  <div class="map-stat-card stat-occ">
+    <div class="big num-occ">${occupiedCount}</div>
+    <div class="lbl">Occupied</div>
+  </div>
+  <div class="map-stat-card stat-avail">
+    <div class="big num-avail">${availableCount}</div>
+    <div class="lbl">Available</div>
+  </div>
+  <div class="map-stat-card stat-rate">
+    <div class="big num-rate">${occupancy}%</div>
+    <div class="lbl">Occupancy Rate</div>
+  </div>
 </div>
 
-<div class="legend">
-
-<span style="background:red;color:white;">
-Occupied
-</span>
-
-<span style="background:#3b82f6;color:white;">
-Reserved
-</span>
-
-<span style="background:#22c55e;color:white;">
-Available
-</span>
-
+<div class="legend-row">
+  <span class="legend-item legend-occupied"><span class="legend-dot ld-red"></span> Occupied</span>
+  <span class="legend-item legend-reserved"><span class="legend-dot ld-blue"></span> Reserved</span>
+  <span class="legend-item legend-available"><span class="legend-dot ld-green"></span> Available</span>
 </div>
 
-<div class="map-grid">
+<div class="grid-wrap">
 `;
 
           for (let i = 1; i <= 200; i++) {
-slotsHtml += `</div>`;
-            const occupied =
-              occupiedRows.some(r => r.slot === i);
-
-            const reserved =
-              reservedRows.some(r => r.slot === i);
-
-            slotsHtml += `
-<div class="
-slot
-${
-occupied
-? "red"
-: reserved
-? "blue"
-: "green"
-}
-">
-${i}
-</div>
-`;
-            
+            const occupied = occupiedRows.some(r => r.slot === i);
+            const reserved = reservedRows.some(r => r.slot === i);
+            const cls = occupied ? "red" : reserved ? "blue" : "green";
+            slotsHtml += `<div class="slot ${cls}">${i}</div>`;
           }
 
-        
+          slotsHtml += `</div>`;
 
          const fs = require("fs");
 
@@ -804,13 +780,10 @@ let template = fs.readFileSync(
   "utf8"
 );
 slotsHtml += `
-<br><br>
-
-<center>
-<a href="/dashboard">
-⬅ Dashboard
-</a>
-</center>
+<div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:24px;">
+  <a href="/dashboard" style="display:inline-flex;align-items:center;gap:8px;color:#94a3b8;text-decoration:none;padding:10px 18px;border-radius:10px;border:1px solid rgba(255,255,255,0.08);font-size:0.875rem;font-weight:500;font-family:Inter,sans-serif;transition:0.2s ease;">← Dashboard</a>
+  <a href="/user" style="display:inline-flex;align-items:center;gap:8px;color:#94a3b8;text-decoration:none;padding:10px 18px;border-radius:10px;border:1px solid rgba(255,255,255,0.08);font-size:0.875rem;font-weight:500;font-family:Inter,sans-serif;transition:0.2s ease;">👤 User Portal</a>
+</div>
 `;
 template = template.replace(
   "{{CONTENT}}",

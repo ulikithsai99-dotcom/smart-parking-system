@@ -3,290 +3,407 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>Smart Parking System</title>
-
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; font-family:'Inter',sans-serif; }
 
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family:'Poppins',sans-serif;
+:root {
+  --bg:#04080f; --surface:rgba(255,255,255,0.04); --surface2:rgba(255,255,255,0.07);
+  --border:rgba(255,255,255,0.08); --border2:rgba(255,255,255,0.14);
+  --primary:#2563eb; --cyan:#06b6d4; --text:#f0f4ff; --text-sub:#94a3b8; --text-muted:#64748b;
+  --radius:20px; --radius-sm:12px; --transition:0.25s cubic-bezier(0.4,0,0.2,1);
 }
 
-body{
-    min-height:100vh;
-    background:linear-gradient(135deg,#0f172a,#1e293b,#334155);
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    padding:20px;
+body {
+  min-height:100vh;
+  background:var(--bg);
+  color:var(--text);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  overflow:hidden;
 }
 
-.container{
-    width:100%;
-    max-width:1300px;
-    display:grid;
-    grid-template-columns:55% 45%;
-    background:rgba(255,255,255,0.08);
-    backdrop-filter:blur(15px);
-    border-radius:25px;
-    overflow:hidden;
-    box-shadow:0 20px 50px rgba(0,0,0,0.4);
+/* Animated background */
+.bg-orbs {
+  position:fixed; inset:0; pointer-events:none; z-index:0; overflow:hidden;
+}
+.orb {
+  position:absolute; border-radius:50%; filter:blur(80px); opacity:0.6;
+  animation:drift 12s ease-in-out infinite alternate;
+}
+.orb-1 { width:500px; height:500px; background:radial-gradient(circle, rgba(37,99,235,0.25), transparent 70%); top:-100px; left:-100px; animation-delay:0s; }
+.orb-2 { width:400px; height:400px; background:radial-gradient(circle, rgba(6,182,212,0.18), transparent 70%); bottom:-80px; right:-80px; animation-delay:-4s; }
+.orb-3 { width:300px; height:300px; background:radial-gradient(circle, rgba(124,58,237,0.15), transparent 70%); top:50%; right:20%; animation-delay:-8s; }
+@keyframes drift { from{transform:translate(0,0) scale(1);} to{transform:translate(30px,20px) scale(1.05);} }
+
+/* Grid pattern */
+body::after {
+  content:'';
+  position:fixed; inset:0;
+  background-image: linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+  background-size:60px 60px;
+  pointer-events:none; z-index:0;
 }
 
-.left{
-    padding:45px;
-    color:white;
-    display:flex;
-    flex-direction:column;
-    justify-content:center;
+.wrapper {
+  position:relative; z-index:1;
+  width:100%; max-width:1200px;
+  display:grid;
+  grid-template-columns:1fr 420px;
+  gap:0;
+  border-radius:28px;
+  overflow:hidden;
+  box-shadow:
+    0 0 0 1px var(--border2),
+    0 40px 80px rgba(0,0,0,0.6),
+    0 0 120px rgba(37,99,235,0.08);
+  animation: fadeInUp 0.6s ease both;
+}
+@keyframes fadeInUp { from{opacity:0;transform:translateY(24px);} to{opacity:1;transform:translateY(0);} }
+
+/* LEFT PANEL */
+.left {
+  background: linear-gradient(145deg, rgba(8,14,28,0.98), rgba(4,10,22,0.99));
+  border-right:1px solid var(--border);
+  padding:56px 52px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  gap:0;
+  position:relative;
+  overflow:hidden;
+}
+.left::before {
+  content:'';
+  position:absolute; top:0; left:0; right:0; bottom:0;
+  background:
+    radial-gradient(ellipse 60% 50% at 10% 20%, rgba(37,99,235,0.12) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 40% at 90% 80%, rgba(6,182,212,0.08) 0%, transparent 70%);
+  pointer-events:none;
 }
 
-.left h1{
-    font-size:3rem;
-    margin-bottom:15px;
+.brand-badge {
+  display:inline-flex; align-items:center; gap:8px;
+  background:rgba(37,99,235,0.12);
+  border:1px solid rgba(59,130,246,0.25);
+  padding:6px 14px;
+  border-radius:100px;
+  font-size:0.75rem;
+  font-weight:600;
+  color:#60a5fa;
+  letter-spacing:0.05em;
+  text-transform:uppercase;
+  margin-bottom:28px;
+  width:fit-content;
+}
+.brand-badge .dot { width:6px; height:6px; background:#22c55e; border-radius:50%; animation: pulse-dot 2s infinite; }
+@keyframes pulse-dot { 0%,100%{opacity:1;} 50%{opacity:0.4;} }
+
+.left h1 {
+  font-size:3.2rem;
+  font-weight:900;
+  letter-spacing:-0.04em;
+  line-height:1.1;
+  margin-bottom:16px;
+  background:linear-gradient(135deg, #f0f4ff 0%, #93c5fd 50%, #67e8f9 100%);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  background-clip:text;
 }
 
-.left p{
-    color:#cbd5e1;
-    line-height:1.8;
-    margin-bottom:25px;
+.tagline {
+  color:var(--text-sub);
+  font-size:1.05rem;
+  line-height:1.7;
+  margin-bottom:40px;
+  max-width:420px;
 }
 
-.stats{
-    display:grid;
-    grid-template-columns:repeat(3,1fr);
-    gap:15px;
+.feature-list { display:flex; flex-direction:column; gap:12px; margin-bottom:44px; }
+.feature-item {
+  display:flex; align-items:center; gap:14px;
+  padding:14px 18px;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:14px;
+  transition:var(--transition);
+}
+.feature-item:hover { background:var(--surface2); border-color:var(--border2); }
+.feature-icon {
+  width:36px; height:36px; border-radius:10px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:1.1rem; flex-shrink:0;
+}
+.fi-blue { background:rgba(37,99,235,0.2); border:1px solid rgba(59,130,246,0.3); }
+.fi-cyan { background:rgba(6,182,212,0.15); border:1px solid rgba(6,182,212,0.3); }
+.fi-green { background:rgba(16,185,129,0.15); border:1px solid rgba(16,185,129,0.3); }
+.feature-text h4 { font-size:0.9rem; font-weight:600; margin-bottom:2px; }
+.feature-text p { font-size:0.78rem; color:var(--text-muted); }
+
+.stats-row {
+  display:grid; grid-template-columns:repeat(3,1fr); gap:12px;
+}
+.stat-pill {
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:18px 14px;
+  text-align:center;
+  transition:var(--transition);
+}
+.stat-pill:hover { border-color:var(--border2); }
+.stat-pill .num {
+  font-size:1.4rem; font-weight:800; letter-spacing:-0.02em;
+  background:linear-gradient(135deg, #f0f4ff, #93c5fd);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+}
+.stat-pill .lbl { font-size:0.72rem; color:var(--text-muted); font-weight:500; margin-top:3px; }
+
+/* RIGHT PANEL */
+.right {
+  background:rgba(6,12,24,0.97);
+  padding:52px 44px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  position:relative;
+}
+.right::before {
+  content:'';
+  position:absolute; top:0; left:0; width:1px; bottom:0;
+  background:linear-gradient(180deg, transparent, rgba(59,130,246,0.4), transparent);
 }
 
-.stat-card{
-    background:rgba(255,255,255,0.1);
-    padding:15px 20px;
-    border-radius:15px;
-    min-width:140px;
-    text-align:center;
+.form-header { margin-bottom:36px; }
+.form-header .pill {
+  display:inline-flex; align-items:center; gap:6px;
+  background:rgba(37,99,235,0.12);
+  border:1px solid rgba(59,130,246,0.2);
+  padding:5px 12px; border-radius:8px;
+  font-size:0.72rem; font-weight:700;
+  color:#60a5fa; letter-spacing:0.06em;
+  text-transform:uppercase; margin-bottom:14px;
+}
+.form-header h2 {
+  font-size:1.8rem; font-weight:800;
+  letter-spacing:-0.03em; margin-bottom:6px;
+}
+.form-header p { color:var(--text-sub); font-size:0.9rem; }
+
+.field-wrap { margin-bottom:16px; }
+.field-label {
+  display:block; font-size:0.78rem; font-weight:600;
+  color:var(--text-sub); letter-spacing:0.03em;
+  text-transform:uppercase; margin-bottom:8px;
+}
+.field-input {
+  width:100%; padding:13px 16px;
+  background:rgba(255,255,255,0.04);
+  border:1px solid var(--border2);
+  border-radius:var(--radius-sm);
+  color:var(--text); font-size:0.95rem;
+  font-family:'Inter',sans-serif;
+  outline:none; transition:var(--transition);
+}
+.field-input::placeholder { color:var(--text-muted); }
+.field-input:focus {
+  border-color:#3b82f6;
+  background:rgba(59,130,246,0.06);
+  box-shadow:0 0 0 3px rgba(59,130,246,0.12);
 }
 
-.stat-card h2{
-    font-size:1.6rem;
+.submit-btn {
+  width:100%; padding:15px;
+  background:linear-gradient(135deg, var(--primary) 0%, var(--cyan) 100%);
+  border:none; border-radius:var(--radius-sm);
+  color:white; font-size:1rem; font-weight:700;
+  font-family:'Inter',sans-serif;
+  cursor:pointer; transition:var(--transition);
+  position:relative; overflow:hidden;
+  letter-spacing:0.01em; margin-top:8px;
 }
+.submit-btn::before {
+  content:''; position:absolute; inset:0;
+  background:linear-gradient(rgba(255,255,255,0.15), transparent);
+  opacity:0; transition:var(--transition);
+}
+.submit-btn:hover { transform:translateY(-2px); box-shadow:0 10px 35px rgba(37,99,235,0.5); }
+.submit-btn:hover::before { opacity:1; }
+.submit-btn:active { transform:translateY(0); }
 
-.right{
-    background:white;
-    padding:60px;
-    display:flex;
-    flex-direction:column;
-    justify-content:center;
+.quick-links {
+  display:flex; flex-direction:column; gap:8px;
+  margin-top:24px;
+  padding-top:24px;
+  border-top:1px solid var(--border);
 }
+.quick-link {
+  display:flex; align-items:center; gap:10px;
+  color:var(--text-sub); text-decoration:none;
+  padding:11px 14px; border-radius:10px;
+  border:1px solid var(--border);
+  font-size:0.875rem; font-weight:500;
+  transition:var(--transition);
+}
+.quick-link:hover {
+  color:var(--text); background:var(--surface2);
+  border-color:var(--border2); transform:translateX(3px);
+}
+.quick-link .ql-icon { font-size:1rem; width:18px; text-align:center; }
 
-.form-title{
-    text-align:center;
-    margin-bottom:25px;
+.clock-display {
+  display:flex; align-items:center; gap:8px;
+  margin-top:20px;
+  padding:10px 14px;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:10px;
+  font-size:0.8rem; color:var(--text-muted);
 }
-
-.form-title h2{
-    color:#0f172a;
-}
-
-.form-title p{
-    color:gray;
-}
-
-.input-group{
-    margin-bottom:15px;
-}
-
-input{
-    width:100%;
-    padding:14px;
-    border:none;
-    outline:none;
-    border-radius:12px;
-    background:#f1f5f9;
-    font-size:15px;
-}
-
-input:focus{
-    border:2px solid #3b82f6;
-}
-
-button{
-    width:100%;
-    padding:15px;
-    border:none;
-    border-radius:12px;
-    background:linear-gradient(135deg,#3b82f6,#2563eb);
-    color:white;
-    font-size:16px;
-    font-weight:600;
-    cursor:pointer;
-    transition:0.3s;
-}
-
-button:hover{
-    transform:translateY(-3px);
-}
-
-.links{
-    text-align:center;
-    margin-top:20px;
-}
-
-.links a{
-    text-decoration:none;
-    color:#2563eb;
-    font-weight:600;
-}
+.clock-display span { color:var(--text-sub); font-weight:600; }
 
 @media(max-width:900px){
-
-.container{
-    grid-template-columns:1fr;
+  .wrapper { grid-template-columns:1fr; }
+  .left { padding:40px 32px; }
+  .left h1 { font-size:2.2rem; }
+  .right { padding:40px 32px; }
+  .left::before { display:none; }
 }
-
-.left{
-    padding:40px;
+@media(max-width:480px){
+  .left { padding:32px 24px; }
+  .right { padding:32px 24px; }
+  .stats-row { grid-template-columns:repeat(3,1fr); }
 }
-
-.left h1{
-    font-size:2rem;
-}
-}
-
 </style>
 </head>
-
 <body>
 
-<div class="container">
-
-    <div class="left">
-
-        <h1>🚗 Smart Parking System</h1>
-        <h3 style="
-color:#60a5fa;
-margin-bottom:20px;
-font-weight:500;
-">
-Smart • Secure • Real-Time
-</h3>
-        <p style="
-color:#cbd5e1;
-font-size:18px;
-margin-top:10px;
-">
-Smart Parking Management with Real-Time Monitoring
-</p>
-
-       <p>
-Reserve slots, track availability in real-time,
-manage entries and exits, and optimize parking
-through smart automation.
-</p>
-
-        <div class="stats">
-
-            <div class="stat-card">
-                <h2>200+</h2>
-                <span>Slots</span>
-            </div>
-
-            <div class="stat-card">
-                <h2>24/7</h2>
-                <span>Access</span>
-            </div>
-
-            <div class="stat-card">
-                <h2>AI</h2>
-                <span>Powered</span>
-            </div>
-           <div class="stat-card">
-    <h2>100%</h2>
-    <span>Secure</span>
-</div>
-           <div class="stat-card">
-    <h2 id="clock">--:--</h2>
-    <span>Current Time</span>
-</div>
-<div class="stat-card">
-    <h2 id="date">--/--/----</h2>
-    <span>Current Date</span>
-</div>
-        </div>
-
-     </div>
-
-    <div class="right">
-
-        <div class="form-title">
-            <h2>🅿 Parking Entry</h2>
-            <p>Enter your details to get a parking slot</p>
-        </div>
-
-        <form action="/submit" method="POST">
-
-            <div class="input-group">
-                <input name="name" placeholder="👤 Full Name" required>
-            </div>
-
-            <div class="input-group">
-                <input name="phone" placeholder="📞 Phone Number" required>
-            </div>
-
-            <div class="input-group">
-                <input name="vehicle" placeholder="🚘 Vehicle Number" required>
-            </div>
-
-            <button type="submit">
-                Find Available Slot
-            </button>
-
-        </form>
-
-<div class="links">
-
-<div class="links">
-
-<br><br>
-<a href="/reserve">🏢 Staff Reservation</a>
-
-<br><br>
-<a href="/map">📍 View Live Parking Map</a>
-
-<br><br>
-<a href="/admin">🔐 Admin Login</a>
-
+<div class="bg-orbs">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
 </div>
 
+<div class="wrapper">
+  <div class="left">
+    <div class="brand-badge">
+      <span class="dot"></span>
+      System Online
     </div>
 
+    <h1>Smart Parking<br>System</h1>
+
+    <p class="tagline">
+      Real-time slot management, automated allocation, and intelligent monitoring — all in one platform.
+    </p>
+
+    <div class="feature-list">
+      <div class="feature-item">
+        <div class="feature-icon fi-blue">🎯</div>
+        <div class="feature-text">
+          <h4>Auto Slot Assignment</h4>
+          <p>Instantly finds the next available slot</p>
+        </div>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon fi-cyan">📡</div>
+        <div class="feature-text">
+          <h4>Real-Time Map</h4>
+          <p>Live visual grid of all 200 parking slots</p>
+        </div>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon fi-green">🔒</div>
+        <div class="feature-text">
+          <h4>Staff Reservations</h4>
+          <p>Priority slots for employees & staff</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-pill">
+        <div class="num">200</div>
+        <div class="lbl">Total Slots</div>
+      </div>
+      <div class="stat-pill">
+        <div class="num">24/7</div>
+        <div class="lbl">Monitoring</div>
+      </div>
+      <div class="stat-pill">
+        <div class="num" id="liveTime">--:--</div>
+        <div class="lbl">Current Time</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="right">
+    <div class="form-header">
+      <div class="pill">🅿 Parking Entry</div>
+      <h2>Park Your Vehicle</h2>
+      <p>Fill in your details to get an auto-assigned slot</p>
+    </div>
+
+    <form action="/submit" method="POST">
+      <div class="field-wrap">
+        <label class="field-label">Full Name</label>
+        <input class="field-input" name="name" placeholder="e.g. John Smith" required>
+      </div>
+      <div class="field-wrap">
+        <label class="field-label">Phone Number</label>
+        <input class="field-input" name="phone" placeholder="10-digit mobile number" required>
+      </div>
+      <div class="field-wrap">
+        <label class="field-label">Vehicle Number</label>
+        <input class="field-input" name="vehicle" placeholder="e.g. MH12AB1234" required>
+      </div>
+      <button type="submit" class="submit-btn">
+        Find &amp; Assign Slot →
+      </button>
+    </form>
+
+    <div class="quick-links">
+      <a href="/reserve" class="quick-link">
+        <span class="ql-icon">🏢</span>
+        Staff Reservation
+      </a>
+      <a href="/map" class="quick-link">
+        <span class="ql-icon">📍</span>
+        View Live Parking Map
+      </a>
+      <a href="/exit" class="quick-link">
+        <span class="ql-icon">🚪</span>
+        Vehicle Exit
+      </a>
+      <a href="/search" class="quick-link">
+        <span class="ql-icon">🔍</span>
+        Search Vehicle
+      </a>
+      <a href="/admin" class="quick-link">
+        <span class="ql-icon">🔐</span>
+        Admin Portal
+      </a>
+    </div>
+
+    <div class="clock-display">
+      🕐 <span id="liveClock">--:-- --</span> &nbsp;·&nbsp; <span id="liveDate">-- --- ----</span>
+    </div>
+  </div>
 </div>
+
 <script>
-function updateDateTime() {
-
-    const now = new Date();
-
-    document.getElementById("clock").innerHTML =
-        now.toLocaleTimeString();
-
-    document.getElementById("date").innerHTML =
-        now.toLocaleDateString(
-            "en-IN",
-            {
-                day:"2-digit",
-                month:"short",
-                year:"numeric"
-            }
-        );
+function updateTime() {
+  const now = new Date();
+  document.getElementById('liveClock').textContent = now.toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+  document.getElementById('liveDate').textContent = now.toLocaleDateString('en-IN', {day:'2-digit', month:'short', year:'numeric'});
+  document.getElementById('liveTime').textContent = now.toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit', hour12:false});
 }
-
-setInterval(updateDateTime,1000);
-updateDateTime();
+setInterval(updateTime, 1000);
+updateTime();
 </script>
 </body>
 </html>

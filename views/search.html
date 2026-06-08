@@ -1,48 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Search Vehicle</title>
-
+<title>Search Vehicle — Smart Parking</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/css/style.css">
-
 </head>
-
 <body>
-
 <div class="page">
-
-<div class="glass-card">
-
-<h1>🔍 Search Vehicle</h1>
-
-<p>Find a parked vehicle instantly</p>
-
-<form action="/searchVehicle" method="POST">
-
-<input
-type="text"
-name="vehicle"
-placeholder="Enter Vehicle Number"
-required
->
-
-<button type="submit">
-Search Vehicle
-</button>
-
-</form>
-
-<div class="links">
-<a href="/user">🏠 Home</a>
+  <div class="glass-card">
+    <div class="icon-wrap">🔍</div>
+    <h1>Find a Vehicle</h1>
+    <p>Look up any currently parked vehicle by its number plate</p>
+    <form action="/searchVehicle" method="POST">
+      <input type="text" name="vehicle" placeholder="e.g. MH12AB1234" required autocomplete="off" style="text-transform:uppercase;">
+      <button type="submit">Search Now →</button>
+    </form>
+    <div class="links" style="margin-top:20px;">
+      <a href="/user">← User Portal</a>
+      <a href="/map">📍 Live Map</a>
+    </div>
+  </div>
 </div>
-
-</div>
-
-</div>
-
 </body>
 </html>
