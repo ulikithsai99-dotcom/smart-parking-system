@@ -3,114 +3,147 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dashboard — Smart Parking</title>
+<title>Dashboard — Smart Parking AI</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/css/style.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
 body { position:relative; z-index:1; }
 body::before {
   content:''; position:fixed; inset:0;
   background:
-    radial-gradient(ellipse 60% 40% at 5% 10%, rgba(37,99,235,0.1) 0%, transparent 60%),
-    radial-gradient(ellipse 50% 50% at 95% 90%, rgba(6,182,212,0.08) 0%, transparent 60%);
+    radial-gradient(ellipse 60% 40% at 5% 10%, rgba(37,99,235,.09) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 50% at 95% 90%, rgba(6,182,212,.07) 0%, transparent 60%);
   pointer-events:none; z-index:0;
 }
 body::after {
   content:''; position:fixed; inset:0;
-  background-image:linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
+  background-image:linear-gradient(rgba(255,255,255,.015) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.015) 1px, transparent 1px);
   background-size:60px 60px; pointer-events:none; z-index:0;
 }
 
+/* ── Overview cards ── */
 .dash-stat-card {
-  background:rgba(255,255,255,0.04);
-  border:1px solid rgba(255,255,255,0.08);
-  border-radius:20px;
-  padding:28px 24px;
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:20px; padding:26px 22px;
   position:relative; overflow:hidden;
-  transition:0.25s cubic-bezier(0.4,0,0.2,1);
+  transition:.25s cubic-bezier(.4,0,.2,1);
 }
-.dash-stat-card::before {
-  content:''; position:absolute; top:0; left:0; right:0; height:2px;
-  opacity:0; transition:0.25s ease;
-}
-.dash-stat-card:hover { transform:translateY(-4px); border-color:rgba(255,255,255,0.14); }
+.dash-stat-card::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; opacity:0; transition:.25s ease; }
+.dash-stat-card:hover { transform:translateY(-4px); border-color:rgba(255,255,255,.14); }
 .dash-stat-card:hover::before { opacity:1; }
-.card-blue::before { background:linear-gradient(90deg, #2563eb, #3b82f6); }
-.card-cyan::before { background:linear-gradient(90deg, #0891b2, #06b6d4); }
-.card-green::before { background:linear-gradient(90deg, #059669, #10b981); }
-.card-purple::before { background:linear-gradient(90deg, #7c3aed, #8b5cf6); }
+.card-blue::before { background:linear-gradient(90deg,#2563eb,#3b82f6); }
+.card-cyan::before  { background:linear-gradient(90deg,#0891b2,#06b6d4); }
+.card-green::before { background:linear-gradient(90deg,#059669,#10b981); }
+.card-purple::before{ background:linear-gradient(90deg,#7c3aed,#8b5cf6); }
+.card-red::before   { background:linear-gradient(90deg,#dc2626,#ef4444); }
+.card-yellow::before{ background:linear-gradient(90deg,#d97706,#f59e0b); }
 
-.dash-stat-card .card-icon-wrap {
-  width:48px; height:48px; border-radius:14px;
+.card-icon-wrap {
+  width:44px; height:44px; border-radius:12px;
   display:flex; align-items:center; justify-content:center;
-  font-size:1.4rem; margin-bottom:18px;
+  font-size:1.3rem; margin-bottom:16px;
 }
-.icon-blue { background:rgba(37,99,235,0.18); border:1px solid rgba(59,130,246,0.3); }
-.icon-cyan { background:rgba(6,182,212,0.15); border:1px solid rgba(6,182,212,0.3); }
-.icon-green { background:rgba(16,185,129,0.15); border:1px solid rgba(16,185,129,0.3); }
-.icon-purple { background:rgba(124,58,237,0.15); border:1px solid rgba(139,92,246,0.3); }
+.icon-blue   { background:rgba(37,99,235,.18); border:1px solid rgba(59,130,246,.3); }
+.icon-cyan   { background:rgba(6,182,212,.15);  border:1px solid rgba(6,182,212,.3);  }
+.icon-green  { background:rgba(16,185,129,.15); border:1px solid rgba(16,185,129,.3); }
+.icon-purple { background:rgba(124,58,237,.15); border:1px solid rgba(139,92,246,.3); }
+.icon-red    { background:rgba(239,68,68,.15);  border:1px solid rgba(239,68,68,.3);  }
+.icon-yellow { background:rgba(245,158,11,.15); border:1px solid rgba(245,158,11,.3); }
 
-.dash-stat-card .big-num {
-  font-size:2.4rem; font-weight:900; letter-spacing:-0.04em;
-  background:linear-gradient(135deg, #f0f4ff, #93c5fd);
+.big-num {
+  font-size:2.2rem; font-weight:900; letter-spacing:-.04em;
+  background:linear-gradient(135deg,#f0f4ff,#93c5fd);
   -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
-  line-height:1; margin-bottom:8px;
+  line-height:1; margin-bottom:6px;
 }
-.dash-stat-card .card-title {
-  font-size:0.85rem; color:#94a3b8; font-weight:500;
-}
+.card-title { font-size:.82rem; color:#94a3b8; font-weight:500; }
 
-.quick-actions { display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:14px; margin-top:32px; }
+/* ── AI Panel ── */
+.ai-panel {
+  background:rgba(255,255,255,.025);
+  border:1px solid rgba(59,130,246,.18);
+  border-radius:20px; overflow:hidden;
+  margin-bottom:24px;
+}
+.ai-panel-header {
+  background:linear-gradient(135deg, rgba(37,99,235,.12), rgba(6,182,212,.07));
+  border-bottom:1px solid rgba(59,130,246,.15);
+  padding:20px 24px;
+  display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;
+}
+.ai-panel-header h3 { font-size:1rem; font-weight:800; letter-spacing:-.01em; display:flex; align-items:center; gap:10px; }
+.ai-panel-body { padding:24px; }
+
+.status-pill {
+  display:inline-flex; align-items:center; gap:8px;
+  padding:8px 18px; border-radius:100px;
+  font-size:.8rem; font-weight:700; letter-spacing:.04em;
+}
+.status-peak     { background:rgba(239,68,68,.15); border:1px solid rgba(239,68,68,.3); color:#fca5a5; }
+.status-moderate { background:rgba(245,158,11,.15); border:1px solid rgba(245,158,11,.3); color:#fcd34d; }
+.status-low      { background:rgba(16,185,129,.15); border:1px solid rgba(16,185,129,.3); color:#6ee7b7; }
+
+.insight-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:14px; margin-bottom:24px; }
+.insight-card {
+  background:rgba(255,255,255,.035);
+  border:1px solid rgba(255,255,255,.07);
+  border-radius:14px; padding:18px;
+}
+.insight-card .i-label { font-size:.72rem; font-weight:700; color:#64748b; letter-spacing:.05em; text-transform:uppercase; margin-bottom:6px; }
+.insight-card .i-value { font-size:1.15rem; font-weight:800; color:#f0f4ff; }
+.insight-card .i-sub   { font-size:.75rem; color:#94a3b8; margin-top:4px; }
+
+.chart-container { position:relative; height:220px; }
+
+.zone-row { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-top:20px; }
+.zone-card {
+  background:rgba(255,255,255,.03);
+  border:1px solid rgba(255,255,255,.06);
+  border-radius:12px; padding:14px 10px; text-align:center;
+}
+.zone-card .zone-letter { font-size:1.5rem; font-weight:900; letter-spacing:-.02em; }
+.zone-card .zone-range { font-size:.7rem; color:#64748b; margin-top:2px; }
+.zone-card .zone-bar { height:4px; border-radius:2px; background:rgba(255,255,255,.06); margin-top:8px; }
+.zone-card .zone-fill { height:100%; border-radius:2px; transition:.4s ease; }
+
+/* ── Quick actions ── */
 .action-card {
-  display:flex; align-items:center; gap:16px;
-  padding:20px 22px;
-  background:rgba(255,255,255,0.04);
-  border:1px solid rgba(255,255,255,0.08);
-  border-radius:16px;
-  text-decoration:none; color:#f0f4ff;
-  transition:0.25s cubic-bezier(0.4,0,0.2,1);
+  display:flex; align-items:center; gap:14px;
+  padding:18px 20px;
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:16px; text-decoration:none; color:#f0f4ff;
+  transition:.25s cubic-bezier(.4,0,.2,1);
   position:relative; overflow:hidden;
 }
-.action-card::after {
-  content:'→';
-  position:absolute; right:20px; top:50%; transform:translateY(-50%);
-  color:#64748b; font-size:1rem; transition:0.2s ease;
-}
-.action-card:hover { background:rgba(255,255,255,0.07); border-color:rgba(255,255,255,0.14); transform:translateX(4px); }
-.action-card:hover::after { right:14px; color:#93c5fd; }
-.action-icon { width:44px; height:44px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:1.3rem; flex-shrink:0; }
-.action-text h4 { font-size:0.9rem; font-weight:700; margin-bottom:3px; }
-.action-text p { font-size:0.75rem; color:#64748b; }
+.action-card::after { content:'→'; position:absolute; right:18px; top:50%; transform:translateY(-50%); color:#64748b; transition:.2s ease; }
+.action-card:hover { background:rgba(255,255,255,.07); border-color:rgba(255,255,255,.14); transform:translateX(3px); }
+.action-card:hover::after { right:12px; color:#93c5fd; }
+.action-icon { width:42px; height:42px; border-radius:11px; display:flex; align-items:center; justify-content:center; font-size:1.2rem; flex-shrink:0; }
+.action-text h4 { font-size:.88rem; font-weight:700; margin-bottom:2px; }
+.action-text p  { font-size:.73rem; color:#64748b; }
 
 .section-title {
-  font-size:1rem; font-weight:700; letter-spacing:-0.01em; margin-bottom:16px;
-  display:flex; align-items:center; gap:10px; color:#f0f4ff;
+  font-size:.85rem; font-weight:700; letter-spacing:.06em;
+  text-transform:uppercase; color:#64748b;
+  margin-bottom:16px; display:flex; align-items:center; gap:10px;
 }
-.section-title::after { content:''; flex:1; height:1px; background:rgba(255,255,255,0.06); }
+.section-title::after { content:''; flex:1; height:1px; background:rgba(255,255,255,.05); }
 
-.logout-btn {
-  display:flex; align-items:center; gap:10px;
-  color:#f87171; text-decoration:none; padding:12px 16px;
-  border-radius:12px; font-size:0.9rem; font-weight:500;
-  border:1px solid rgba(239,68,68,0.15);
-  transition:0.25s cubic-bezier(0.4,0,0.2,1);
-  background:rgba(239,68,68,0.05);
-  margin-top:8px;
-}
-.logout-btn:hover { background:rgba(239,68,68,0.12); border-color:rgba(239,68,68,0.3); transform:translateX(3px); }
+@keyframes pulse-dot { 0%,100%{opacity:1;} 50%{opacity:.3;} }
 </style>
 </head>
 <body>
 
 <div class="dashboard">
+  <!-- SIDEBAR -->
   <div class="sidebar">
     <div class="sidebar-logo">
       <div class="logo-icon">🚗</div>
-      <div>
-        <h2>Smart Parking</h2>
-        <small>Control Center</small>
-      </div>
+      <div><h2>Smart Parking</h2><small>AI Control Center</small></div>
     </div>
 
     <div class="nav-label">Management</div>
@@ -124,86 +157,281 @@ body::after {
     <a href="/exit"><span class="nav-icon">🚪</span> Vehicle Exit</a>
     <a href="/search"><span class="nav-icon">🔍</span> Search Vehicle</a>
 
-    <div class="sidebar-footer" style="margin-top:auto; padding-top:20px; border-top:1px solid rgba(255,255,255,0.06);">
-      <a href="/logout" class="logout-btn">
-        <span>⏻</span> Logout
-      </a>
+    <div class="sidebar-footer" style="margin-top:auto;padding-top:20px;border-top:1px solid rgba(255,255,255,.06);">
+      <a href="/logout" style="display:flex;align-items:center;gap:10px;color:#f87171;text-decoration:none;padding:12px 16px;border-radius:12px;font-size:.9rem;font-weight:500;border:1px solid rgba(239,68,68,.15);background:rgba(239,68,68,.05);">⏻ Logout</a>
     </div>
   </div>
 
-  <div class="main" style="position:relative;z-index:1;">
-    <div class="page-header" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;">
+  <!-- MAIN -->
+  <div class="main" style="position:relative;z-index:1;overflow-y:auto;">
+
+    <!-- Header -->
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:28px;">
       <div>
-        <h1 style="font-size:1.9rem;font-weight:900;letter-spacing:-0.03em;">Admin Dashboard</h1>
-        <p style="color:#94a3b8;margin-top:5px;font-size:0.95rem;">Monitor and manage your parking operations</p>
+        <h1 style="font-size:1.9rem;font-weight:900;letter-spacing:-.03em;">Admin Dashboard</h1>
+        <p style="color:#94a3b8;margin-top:5px;font-size:.95rem;">AI-powered parking operations</p>
       </div>
-      <div style="display:flex;align-items:center;gap:8px;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.2);padding:8px 16px;border-radius:100px;font-size:0.8rem;font-weight:600;color:#34d399;">
-        <span style="width:7px;height:7px;background:#22c55e;border-radius:50%;display:inline-block;animation:pulse-dot 2s infinite;"></span>
-        System Online
+      <div id="liveStatus" style="display:flex;align-items:center;gap:8px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.2);padding:8px 16px;border-radius:100px;font-size:.78rem;font-weight:700;color:#34d399;letter-spacing:.04em;">
+        <span style="width:7px;height:7px;background:#22c55e;border-radius:50%;animation:pulse-dot 2s infinite;"></span>
+        LOADING...
       </div>
     </div>
 
-    <div class="section-title">Overview</div>
-    <div class="stats-grid">
+    <!-- Live Stats Row -->
+    <div class="section-title">Live Overview</div>
+    <div class="stats-grid" style="margin-bottom:28px;">
       <div class="dash-stat-card card-blue">
         <div class="card-icon-wrap icon-blue">🅿</div>
-        <div class="big-num">200</div>
-        <div class="card-title">Total Parking Slots</div>
-      </div>
-      <div class="dash-stat-card card-cyan">
-        <div class="card-icon-wrap icon-cyan">📡</div>
-        <div class="big-num">24/7</div>
-        <div class="card-title">Live Monitoring</div>
+        <div class="big-num" id="stat-total">200</div>
+        <div class="card-title">Total Slots</div>
       </div>
       <div class="dash-stat-card card-green">
-        <div class="card-icon-wrap icon-green">🤖</div>
-        <div class="big-num">AI</div>
-        <div class="card-title">Auto Assignment</div>
+        <div class="card-icon-wrap icon-green">✅</div>
+        <div class="big-num" id="stat-avail" style="background:linear-gradient(135deg,#6ee7b7,#10b981);-webkit-background-clip:text;background-clip:text;">—</div>
+        <div class="card-title">Available Now</div>
+      </div>
+      <div class="dash-stat-card card-red">
+        <div class="card-icon-wrap icon-red">🚗</div>
+        <div class="big-num" id="stat-occ" style="background:linear-gradient(135deg,#fca5a5,#ef4444);-webkit-background-clip:text;background-clip:text;">—</div>
+        <div class="card-title">Occupied</div>
+      </div>
+      <div class="dash-stat-card card-yellow">
+        <div class="card-icon-wrap icon-yellow">📈</div>
+        <div class="big-num" id="stat-pct" style="background:linear-gradient(135deg,#fde68a,#f59e0b);-webkit-background-clip:text;background-clip:text;">—</div>
+        <div class="card-title">Occupancy Rate</div>
+      </div>
+      <div class="dash-stat-card card-cyan">
+        <div class="card-icon-wrap icon-cyan">📅</div>
+        <div class="big-num" id="stat-today" style="background:linear-gradient(135deg,#67e8f9,#06b6d4);-webkit-background-clip:text;background-clip:text;">—</div>
+        <div class="card-title">Today's Entries</div>
       </div>
       <div class="dash-stat-card card-purple">
-        <div class="card-icon-wrap icon-purple">🔒</div>
-        <div class="big-num">100%</div>
-        <div class="card-title">Secure Platform</div>
+        <div class="card-icon-wrap icon-purple">⏱</div>
+        <div class="big-num" id="stat-avgstay" style="background:linear-gradient(135deg,#ddd6fe,#8b5cf6);-webkit-background-clip:text;background-clip:text;">—</div>
+        <div class="card-title">Avg Stay (min)</div>
       </div>
     </div>
 
-    <div class="section-title" style="margin-top:36px;">Quick Access</div>
-    <div class="quick-actions">
+    <!-- AI Panel -->
+    <div class="section-title">🤖 AI Intelligence</div>
+    <div class="ai-panel">
+      <div class="ai-panel-header">
+        <h3>🤖 Peak Hour Predictor & Smart Allocation</h3>
+        <span id="ai-status-pill" class="status-pill status-low">🟢 Loading...</span>
+      </div>
+      <div class="ai-panel-body">
+
+        <!-- Insight cards -->
+        <div class="insight-grid">
+          <div class="insight-card">
+            <div class="i-label">Current Demand</div>
+            <div class="i-value" id="ai-demand">—%</div>
+            <div class="i-sub">Predicted occupancy now</div>
+          </div>
+          <div class="insight-card">
+            <div class="i-label">Next Peak</div>
+            <div class="i-value" id="ai-next-peak">—</div>
+            <div class="i-sub">Upcoming busy window</div>
+          </div>
+          <div class="insight-card">
+            <div class="i-label">Allocation Mode</div>
+            <div class="i-value" id="ai-strategy" style="font-size:.92rem;">—</div>
+            <div class="i-sub" id="ai-strategy-desc">—</div>
+          </div>
+        </div>
+
+        <!-- Chart -->
+        <div style="margin-bottom:6px;font-size:.75rem;font-weight:700;color:#64748b;letter-spacing:.05em;text-transform:uppercase;">24-Hour Occupancy Forecast</div>
+        <div class="chart-container">
+          <canvas id="forecastChart"></canvas>
+        </div>
+
+        <!-- Zone distribution -->
+        <div style="margin-top:20px;font-size:.75rem;font-weight:700;color:#64748b;letter-spacing:.05em;text-transform:uppercase;margin-bottom:10px;">Parking Zones</div>
+        <div class="zone-row" id="zone-row">
+          <div class="zone-card"><div class="zone-letter" style="color:#93c5fd;">A</div><div class="zone-range">Slots 1–50</div><div class="zone-bar"><div class="zone-fill" id="zone-a-fill" style="background:#3b82f6;width:0%"></div></div><div id="zone-a-pct" style="font-size:.7rem;color:#64748b;margin-top:4px;">—%</div></div>
+          <div class="zone-card"><div class="zone-letter" style="color:#6ee7b7;">B</div><div class="zone-range">Slots 51–100</div><div class="zone-bar"><div class="zone-fill" id="zone-b-fill" style="background:#10b981;width:0%"></div></div><div id="zone-b-pct" style="font-size:.7rem;color:#64748b;margin-top:4px;">—%</div></div>
+          <div class="zone-card"><div class="zone-letter" style="color:#fcd34d;">C</div><div class="zone-range">Slots 101–150</div><div class="zone-bar"><div class="zone-fill" id="zone-c-fill" style="background:#f59e0b;width:0%"></div></div><div id="zone-c-pct" style="font-size:.7rem;color:#64748b;margin-top:4px;">—%</div></div>
+          <div class="zone-card"><div class="zone-letter" style="color:#f9a8d4;">D</div><div class="zone-range">Slots 151–200</div><div class="zone-bar"><div class="zone-fill" id="zone-d-fill" style="background:#ec4899;width:0%"></div></div><div id="zone-d-pct" style="font-size:.7rem;color:#64748b;margin-top:4px;">—%</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="section-title">Quick Access</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;">
       <a href="/history" class="action-card">
         <div class="action-icon icon-blue">📜</div>
-        <div class="action-text">
-          <h4>Parking History</h4>
-          <p>View all vehicle logs</p>
-        </div>
+        <div class="action-text"><h4>Parking History</h4><p>View all vehicle logs</p></div>
       </a>
       <a href="/stats" class="action-card">
         <div class="action-icon icon-cyan">📊</div>
-        <div class="action-text">
-          <h4>Statistics</h4>
-          <p>Occupancy & analytics</p>
-        </div>
+        <div class="action-text"><h4>Statistics</h4><p>Occupancy & analytics</p></div>
       </a>
       <a href="/reservations" class="action-card">
         <div class="action-icon icon-purple">📋</div>
-        <div class="action-text">
-          <h4>Reservations</h4>
-          <p>Staff reserved slots</p>
-        </div>
+        <div class="action-text"><h4>Reservations</h4><p>Staff reserved slots</p></div>
       </a>
       <a href="/map" class="action-card">
         <div class="action-icon icon-green">🗺️</div>
-        <div class="action-text">
-          <h4>Live Map</h4>
-          <p>Real-time slot grid</p>
-        </div>
+        <div class="action-text"><h4>Live Map</h4><p>Real-time slot grid</p></div>
       </a>
     </div>
   </div>
 </div>
 
-<style>
-@keyframes pulse-dot { 0%,100%{opacity:1;} 50%{opacity:0.4;} }
-</style>
+<script>
+let forecastChart = null;
+
+async function loadInsights() {
+  try {
+    const [insRes, predRes] = await Promise.all([
+      fetch('/api/insights'),
+      fetch('/api/predictions')
+    ]);
+    const ins = await insRes.json();
+    const pred = await predRes.json();
+
+    // Live stats
+    document.getElementById('stat-avail').textContent = ins.available;
+    document.getElementById('stat-occ').textContent = ins.live_count;
+    document.getElementById('stat-pct').textContent = ins.live_percent + '%';
+    document.getElementById('stat-today').textContent = ins.today.today_entries;
+    document.getElementById('stat-avgstay').textContent = ins.today.avg_stay_minutes;
+
+    // Live status badge
+    const peak = ins.peak;
+    const statusEl = document.getElementById('liveStatus');
+    if (peak.status === 'peak') {
+      statusEl.style.background = 'rgba(239,68,68,.1)';
+      statusEl.style.borderColor = 'rgba(239,68,68,.25)';
+      statusEl.style.color = '#f87171';
+      statusEl.innerHTML = '<span style="width:7px;height:7px;background:#ef4444;border-radius:50%;animation:pulse-dot 1s infinite;"></span> PEAK HOUR';
+    } else if (peak.status === 'moderate') {
+      statusEl.style.background = 'rgba(245,158,11,.1)';
+      statusEl.style.borderColor = 'rgba(245,158,11,.25)';
+      statusEl.style.color = '#fcd34d';
+      statusEl.innerHTML = '<span style="width:7px;height:7px;background:#f59e0b;border-radius:50%;animation:pulse-dot 2s infinite;"></span> MODERATE';
+    } else {
+      statusEl.style.background = 'rgba(16,185,129,.1)';
+      statusEl.style.borderColor = 'rgba(16,185,129,.2)';
+      statusEl.style.color = '#34d399';
+      statusEl.innerHTML = '<span style="width:7px;height:7px;background:#22c55e;border-radius:50%;animation:pulse-dot 2s infinite;"></span> OFF-PEAK';
+    }
+
+    // AI panel
+    const pillEl = document.getElementById('ai-status-pill');
+    pillEl.textContent = peak.status_label;
+    pillEl.className = 'status-pill status-' + peak.status;
+
+    document.getElementById('ai-demand').textContent = peak.current_percent + '%';
+    document.getElementById('ai-next-peak').textContent = peak.next_peak_label || 'None today';
+
+    const strategyNames = { zone_rotation:'Zone Rotation', balanced:'Balanced', sequential:'Sequential' };
+    document.getElementById('ai-strategy').textContent = strategyNames[peak.strategy] || peak.strategy;
+    document.getElementById('ai-strategy-desc').textContent = peak.strategy === 'zone_rotation'
+      ? 'Spreading load across zones A→D'
+      : peak.strategy === 'balanced'
+      ? 'Progressive zone filling'
+      : 'Lowest-available slot';
+
+    // Forecast chart
+    const predictions = pred.predictions;
+    const labels = predictions.map(p => p.label);
+    const data = predictions.map(p => p.percent);
+    const colors = predictions.map(p => p.color);
+
+    if (forecastChart) {
+      forecastChart.data.labels = labels;
+      forecastChart.data.datasets[0].data = data;
+      forecastChart.data.datasets[0].pointBackgroundColor = colors;
+      forecastChart.update('none');
+    } else {
+      const ctx = document.getElementById('forecastChart').getContext('2d');
+      forecastChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [{
+            label: 'Predicted Occupancy %',
+            data,
+            borderColor: '#3b82f6',
+            backgroundColor: 'rgba(59,130,246,.08)',
+            borderWidth: 2,
+            pointBackgroundColor: colors,
+            pointRadius: 4,
+            pointHoverRadius: 7,
+            tension: 0.4,
+            fill: true,
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: 'rgba(6,12,24,.95)',
+              borderColor: 'rgba(59,130,246,.3)',
+              borderWidth: 1,
+              titleColor: '#93c5fd',
+              bodyColor: '#f0f4ff',
+              callbacks: {
+                label: ctx => ` ${ctx.parsed.y}% predicted occupancy`
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: { color: 'rgba(255,255,255,.04)' },
+              ticks: { color: '#64748b', font: { size: 11 }, maxTicksLimit: 8 }
+            },
+            y: {
+              min: 0, max: 100,
+              grid: { color: 'rgba(255,255,255,.04)' },
+              ticks: { color: '#64748b', font: { size: 11 }, callback: v => v + '%' }
+            }
+          }
+        }
+      });
+    }
+
+    // Zone fill bars (simulate from live occupancy)
+    // We don't have per-zone data from the API, so we distribute live_count proportionally
+    // using a simple model: peak = zone A fills first, rotation = even
+    const liveCount = ins.live_count;
+    let zA=0, zB=0, zC=0, zD=0;
+    if (peak.strategy === 'zone_rotation') {
+      const perZone = Math.floor(liveCount / 4);
+      const rem = liveCount % 4;
+      zA = Math.min(perZone + (rem > 0 ? 1 : 0), 50);
+      zB = Math.min(perZone + (rem > 1 ? 1 : 0), 50);
+      zC = Math.min(perZone + (rem > 2 ? 1 : 0), 50);
+      zD = Math.min(perZone, 50);
+    } else {
+      zA = Math.min(liveCount, 50);
+      zB = Math.min(Math.max(liveCount - 50, 0), 50);
+      zC = Math.min(Math.max(liveCount - 100, 0), 50);
+      zD = Math.min(Math.max(liveCount - 150, 0), 50);
+    }
+    const setPct = (id, fillId, val) => {
+      const pct = Math.round((val / 50) * 100);
+      document.getElementById(id).textContent = pct + '%';
+      document.getElementById(fillId).style.width = pct + '%';
+    };
+    setPct('zone-a-pct', 'zone-a-fill', zA);
+    setPct('zone-b-pct', 'zone-b-fill', zB);
+    setPct('zone-c-pct', 'zone-c-fill', zC);
+    setPct('zone-d-pct', 'zone-d-fill', zD);
+
+  } catch (e) {
+    console.error('Dashboard load error:', e);
+  }
+}
+
+loadInsights();
+setInterval(loadInsights, 30000); // Refresh every 30s
+</script>
 
 </body>
 </html>
