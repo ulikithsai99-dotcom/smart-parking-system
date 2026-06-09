@@ -135,10 +135,19 @@ body::before { content:''; position:fixed; inset:0; background:radial-gradient(e
 // Load current settings
 async function loadSettings() {
   try {
-    const res = await fetch('/api/revenue');
+    const res = await fetch('/api/settings');
     const data = await res.json();
     if(data.hourly_rate) document.getElementById('hourly_rate').value = data.hourly_rate;
     if(data.daily_rate) document.getElementById('daily_rate').value = data.daily_rate;
+    if(data.anomaly_threshold) document.getElementById('anomaly_threshold').value = data.anomaly_threshold;
+    if(data.allocation_mode) {
+      document.getElementById('allocation_mode_input').value = data.allocation_mode;
+      document.querySelectorAll('.mode-option').forEach(el => el.classList.remove('selected'));
+      const modeMap = {ai: 0, sequential: 1, balanced: 2};
+      const idx = modeMap[data.allocation_mode] ?? 0;
+      const options = document.querySelectorAll('.mode-option');
+      if(options[idx]) options[idx].classList.add('selected');
+    }
   } catch(e) {}
 }
 loadSettings();

@@ -3,118 +3,59 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Live Parking Map — Smart Parking</title>
+<title>Live Parking Map — Smart Parking AI</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/css/style.css">
 <style>
-body { padding:0; }
-body::before {
-  content:''; position:fixed; inset:0;
-  background:
-    radial-gradient(ellipse 60% 40% at 5% 5%, rgba(37,99,235,0.1) 0%, transparent 60%),
-    radial-gradient(ellipse 50% 50% at 95% 95%, rgba(6,182,212,0.08) 0%, transparent 60%);
-  pointer-events:none; z-index:0;
-}
-body::after {
-  content:''; position:fixed; inset:0;
-  background-image:linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
-  background-size:60px 60px; pointer-events:none; z-index:0;
-}
+body{padding:0;}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 60% 40% at 5% 5%,rgba(37,99,235,.1) 0%,transparent 60%),radial-gradient(ellipse 50% 50% at 95% 95%,rgba(6,182,212,.08) 0%,transparent 60%);pointer-events:none;z-index:0;}
+body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(255,255,255,.015) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.015) 1px,transparent 1px);background-size:60px 60px;pointer-events:none;z-index:0;}
 
-.map-header {
-  background:rgba(4,8,15,0.95);
-  border-bottom:1px solid rgba(255,255,255,0.06);
-  padding:20px 32px;
-  display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:14px;
-  position:sticky; top:0; z-index:100;
-  backdrop-filter:blur(20px);
-}
-.map-header-left { display:flex; align-items:center; gap:12px; }
-.map-header-logo {
-  width:42px; height:42px; border-radius:12px;
-  background:linear-gradient(135deg, rgba(37,99,235,0.2), rgba(6,182,212,0.15));
-  border:1px solid rgba(59,130,246,0.3);
-  display:flex; align-items:center; justify-content:center; font-size:1.3rem;
-}
-.map-header h1 { font-size:1.25rem; font-weight:800; letter-spacing:-0.02em; }
-.map-header small { color:#94a3b8; font-size:0.75rem; font-weight:400; }
+.map-header{background:rgba(4,8,15,.96);border-bottom:1px solid rgba(255,255,255,.06);padding:18px 32px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;position:sticky;top:0;z-index:100;backdrop-filter:blur(20px);}
+.map-header-left{display:flex;align-items:center;gap:12px;}
+.map-header-logo{width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,rgba(37,99,235,.2),rgba(6,182,212,.15));border:1px solid rgba(59,130,246,.3);display:flex;align-items:center;justify-content:center;font-size:1.3rem;}
+.map-header h1{font-size:1.25rem;font-weight:800;letter-spacing:-.02em;}
+.map-header small{color:#94a3b8;font-size:.75rem;}
+.live-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.2);padding:6px 14px;border-radius:100px;font-size:.75rem;font-weight:700;color:#34d399;letter-spacing:.04em;text-transform:uppercase;}
+.live-badge .dot{width:6px;height:6px;background:#22c55e;border-radius:50%;animation:pulse-dot 2s infinite;}
+@keyframes pulse-dot{0%,100%{opacity:1;}50%{opacity:.3;}}
 
-.live-badge {
-  display:inline-flex; align-items:center; gap:6px;
-  background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.2);
-  padding:6px 14px; border-radius:100px;
-  font-size:0.75rem; font-weight:700; color:#34d399;
-  letter-spacing:0.04em; text-transform:uppercase;
-}
-.live-badge .dot { width:6px; height:6px; background:#22c55e; border-radius:50%; animation:pulse-dot 2s infinite; }
-@keyframes pulse-dot { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+.map-body{padding:28px 32px;position:relative;z-index:1;}
 
-.map-body { padding:28px 32px; position:relative; z-index:1; }
+.map-stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:24px;}
+.map-stat-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:20px;text-align:center;transition:.2s;position:relative;overflow:hidden;}
+.map-stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.map-stat-card:hover{transform:translateY(-3px);}
+.stat-total::before{background:linear-gradient(90deg,#2563eb,#3b82f6);}
+.stat-occ::before{background:linear-gradient(90deg,#dc2626,#ef4444);}
+.stat-avail::before{background:linear-gradient(90deg,#059669,#10b981);}
+.stat-rate::before{background:linear-gradient(90deg,#d97706,#f59e0b);}
+.map-stat-card .big{font-size:2rem;font-weight:900;letter-spacing:-.03em;line-height:1;}
+.map-stat-card .lbl{font-size:.78rem;color:#94a3b8;font-weight:500;margin-top:6px;}
+.num-total{color:#93c5fd;}.num-occ{color:#fca5a5;}.num-avail{color:#6ee7b7;}.num-rate{color:#fcd34d;}
 
-.map-stats-row {
-  display:grid; grid-template-columns:repeat(auto-fit, minmax(160px, 1fr));
-  gap:14px; margin-bottom:24px;
-}
-.map-stat-card {
-  background:rgba(255,255,255,0.04);
-  border:1px solid rgba(255,255,255,0.08);
-  border-radius:16px; padding:20px;
-  text-align:center; transition:0.2s ease;
-  position:relative; overflow:hidden;
-}
-.map-stat-card::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; }
-.map-stat-card:hover { transform:translateY(-3px); }
-.stat-total::before { background:linear-gradient(90deg, #2563eb, #3b82f6); }
-.stat-occ::before { background:linear-gradient(90deg, #dc2626, #ef4444); }
-.stat-avail::before { background:linear-gradient(90deg, #059669, #10b981); }
-.stat-rate::before { background:linear-gradient(90deg, #d97706, #f59e0b); }
-.map-stat-card .big { font-size:2rem; font-weight:900; letter-spacing:-0.03em; line-height:1; }
-.map-stat-card .lbl { font-size:0.78rem; color:#94a3b8; font-weight:500; margin-top:6px; }
-.num-total { color:#93c5fd; }
-.num-occ { color:#fca5a5; }
-.num-avail { color:#6ee7b7; }
-.num-rate { color:#fcd34d; }
+.legend-row{display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:20px;}
+.legend-item{display:inline-flex;align-items:center;gap:8px;padding:7px 14px;border-radius:100px;font-size:.8rem;font-weight:600;}
+.legend-occupied{background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.25);color:#fca5a5;}
+.legend-reserved{background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.25);color:#93c5fd;}
+.legend-available{background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.2);color:#6ee7b7;}
+.legend-dot{width:8px;height:8px;border-radius:50%;}
+.ld-red{background:#ef4444;}.ld-blue{background:#3b82f6;}.ld-green{background:#10b981;}
 
-.legend-row {
-  display:flex; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:20px;
-}
-.legend-item {
-  display:inline-flex; align-items:center; gap:8px;
-  padding:8px 16px; border-radius:100px;
-  font-size:0.8rem; font-weight:600;
-}
-.legend-occupied { background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.3); color:#fca5a5; }
-.legend-reserved { background:rgba(59,130,246,0.15); border:1px solid rgba(59,130,246,0.3); color:#93c5fd; }
-.legend-available { background:rgba(16,185,129,0.15); border:1px solid rgba(16,185,129,0.3); color:#6ee7b7; }
-.legend-dot { width:8px; height:8px; border-radius:50%; }
-.ld-red { background:#ef4444; }
-.ld-blue { background:#3b82f6; }
-.ld-green { background:#10b981; }
+.zone-section{margin-bottom:28px;}
+.zone-section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;padding:0 4px;}
+.zone-section-label{font-size:1rem;font-weight:800;letter-spacing:-.01em;}
+.zone-section-sub{font-size:.78rem;color:#64748b;font-weight:500;}
 
-.grid-wrap {
-  background:rgba(255,255,255,0.025);
-  border:1px solid rgba(255,255,255,0.07);
-  border-radius:20px; padding:24px;
-  display:flex; flex-wrap:wrap; gap:6px;
-}
+.grid-wrap{background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.07);border-radius:20px;padding:20px;display:flex;flex-wrap:wrap;gap:6px;}
+.slot{width:52px;height:52px;border-radius:10px;display:flex;justify-content:center;align-items:center;font-weight:700;font-size:.72rem;cursor:default;transition:.2s cubic-bezier(.4,0,.2,1);}
+.slot:hover{transform:scale(1.15);z-index:2;}
+.red{background:rgba(239,68,68,.18);border:1px solid rgba(239,68,68,.35);color:#fca5a5;box-shadow:0 0 8px rgba(239,68,68,.1);}
+.blue{background:rgba(59,130,246,.18);border:1px solid rgba(59,130,246,.35);color:#93c5fd;box-shadow:0 0 8px rgba(59,130,246,.1);}
+.green{background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.25);color:#6ee7b7;}
 
-.slot {
-  width:50px; height:50px; border-radius:10px;
-  display:flex; justify-content:center; align-items:center;
-  font-weight:700; font-size:0.75rem; cursor:default;
-  transition:0.2s cubic-bezier(0.4,0,0.2,1);
-}
-.slot:hover { transform:scale(1.15); z-index:2; }
-.red { background:rgba(239,68,68,0.18); border:1px solid rgba(239,68,68,0.35); color:#fca5a5; box-shadow:0 0 8px rgba(239,68,68,0.1); }
-.blue { background:rgba(59,130,246,0.18); border:1px solid rgba(59,130,246,0.35); color:#93c5fd; box-shadow:0 0 8px rgba(59,130,246,0.1); }
-.green { background:rgba(16,185,129,0.12); border:1px solid rgba(16,185,129,0.25); color:#6ee7b7; }
-
-@media(max-width:600px){
-  .map-header { padding:16px 20px; }
-  .map-body { padding:20px; }
-  .slot { width:40px; height:40px; font-size:0.68rem; }
-}
+@media(max-width:600px){.map-header{padding:14px 18px;}.map-body{padding:18px;}.slot{width:40px;height:40px;font-size:.65rem;}}
 </style>
 </head>
 <body>
@@ -124,15 +65,25 @@ body::after {
     <div class="map-header-logo">🅿</div>
     <div>
       <h1>Live Parking Map</h1>
-      <small>Real-time slot visualization</small>
+      <small id="mapSubtitle">Real-time slot visualization — all zones</small>
     </div>
   </div>
-  <div class="live-badge"><span class="dot"></span> Live</div>
+  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+    <div id="mapTime" style="font-size:.75rem;color:#64748b;padding:6px 12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:100px;"></div>
+    <div class="live-badge"><span class="dot"></span> Live</div>
+  </div>
 </div>
 
 <div class="map-body">
   {{CONTENT}}
 </div>
 
+<script>
+function tick(){document.getElementById('mapTime').textContent=new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',second:'2-digit'});}
+setInterval(tick,1000);tick();
+
+// Auto-refresh every 30s
+setTimeout(()=>location.reload(),30000);
+</script>
 </body>
 </html>

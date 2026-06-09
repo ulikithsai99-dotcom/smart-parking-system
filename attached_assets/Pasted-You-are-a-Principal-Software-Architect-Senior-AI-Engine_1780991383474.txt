@@ -1,0 +1,406 @@
+You are a Principal Software Architect, Senior AI Engineer, IoT Systems Engineer, and Award-Winning UI/UX Designer.
+
+Analyze the ENTIRE existing Smart Parking System codebase before making any changes.
+
+Do NOT generate placeholder implementations.
+
+Do NOT create duplicate functionality.
+
+Do NOT remove existing working features.
+
+Instead, transform the project into a production-grade AI-Powered Smart Parking Management Platform.
+
+====================================================
+PHASE 1 - FULL CODEBASE AUDIT
+=============================
+
+First:
+
+1. Analyze every file.
+2. Understand current architecture.
+3. Identify bugs.
+4. Identify dead code.
+5. Identify duplicate code.
+6. Identify UI inconsistencies.
+7. Identify scalability issues.
+8. Generate a migration plan.
+
+Then execute the migration.
+
+====================================================
+CORE SYSTEM GOAL
+================
+
+Transform the project into a modern intelligent parking platform suitable for:
+
+* Smart Cities
+* Airports
+* Shopping Malls
+* Universities
+* Corporate Campuses
+
+The application must feel like a commercial SaaS product.
+
+====================================================
+OFFLINE-FIRST ARCHITECTURE
+==========================
+
+The system must operate completely offline.
+
+Requirements:
+
+* Local SQLite database.
+* No internet dependency.
+* Local API server.
+* Local dashboard access.
+* Automatic data persistence.
+* Automatic cloud sync when internet becomes available.
+
+Create an Offline Status Indicator:
+
+ONLINE
+OFFLINE
+SYNCING
+
+Display status globally.
+
+====================================================
+MULTI-ZONE PARKING SYSTEM
+=========================
+
+Create:
+
+Zone A
+Zone B
+Zone C
+Zone D
+
+Each zone contains:
+
+50 slots
+
+Total:
+
+200 slots
+
+Structure:
+
+A1-A50
+B1-B50
+C1-C50
+D1-D50
+
+Zone dashboard must show:
+
+Occupancy
+Availability
+Revenue
+Zone Utilization
+
+====================================================
+SMART ZONE VISUALIZATION
+========================
+
+Create an interactive digital twin.
+
+Features:
+
+* Live parking map
+* Real-time slot updates
+* Zone filters
+* Search slots
+* Zoom controls
+
+Slot Colors:
+
+Green = Available
+Red = Occupied
+Yellow = Reserved
+Blue = AI Recommended
+Gray = Disabled
+
+Animations must be smooth.
+
+====================================================
+NUMBER PLATE RECOGNITION
+========================
+
+Implement Camera Mode.
+
+Support:
+
+* Webcam
+* Uploaded Images
+
+Pipeline:
+
+Camera
+→ OpenCV
+→ OCR
+→ Number Plate Detection
+→ Vehicle Registration
+
+Use:
+
+OpenCV
+EasyOCR
+
+Store:
+
+Vehicle Number
+Entry Time
+Exit Time
+Zone
+Slot
+
+====================================================
+AI-BASED SLOT ASSIGNMENT
+========================
+
+Create Smart Allocation Engine.
+
+Modes:
+
+1. Nearest Slot
+2. Balanced Occupancy
+3. VIP Priority
+4. AI Optimized
+
+AI Engine should:
+
+* Prevent zone imbalance.
+* Reduce congestion.
+* Optimize utilization.
+* Recommend best slot.
+
+Display explanation:
+
+"Assigned B17 because Zone B currently has optimal occupancy."
+
+====================================================
+FIND MY VEHICLE
+===============
+
+User enters:
+
+Vehicle Number
+
+System returns:
+
+Zone
+Slot
+Parking Duration
+Status
+
+Instant search.
+
+====================================================
+AI PREDICTION ENGINE
+====================
+
+Use:
+
+Scikit-Learn
+
+Implement:
+
+* Occupancy Prediction
+* Peak Hour Prediction
+* Daily Forecast
+* Weekly Forecast
+* Zone Utilization Forecast
+
+Display:
+
+Prediction Confidence
+Trend Direction
+Forecast Graphs
+
+====================================================
+AI ANOMALY DETECTION
+====================
+
+Detect:
+
+* Sensor failures
+* Camera failures
+* Unusual parking durations
+* Occupancy spikes
+* Suspicious activity
+
+Generate alerts.
+
+====================================================
+SMART BILLING ENGINE
+====================
+
+Admin configurable.
+
+Settings:
+
+Hourly Rate
+Daily Rate
+Penalty Rate
+Lost Ticket Fee
+
+Example:
+
+₹20/hour
+₹250/day
+
+Admin can modify pricing from dashboard.
+
+====================================================
+AUTOMATIC RECEIPTS
+==================
+
+Generate:
+
+Vehicle Number
+Entry Time
+Exit Time
+Duration
+Zone
+Slot
+Charges
+
+Provide:
+
+Print
+PDF Export
+
+====================================================
+ANALYTICS CENTER
+================
+
+Create executive dashboard.
+
+Show:
+
+Revenue Today
+Revenue This Week
+Revenue This Month
+
+Occupancy Metrics
+
+Zone Utilization
+
+Peak Hours
+
+AI Forecasts
+
+Interactive charts.
+
+====================================================
+ADMIN CONTROL CENTER
+====================
+
+Allow:
+
+Add Zones
+Add Slots
+Disable Slots
+Manage Vehicles
+Manage Pricing
+Manage Cameras
+Manage AI Models
+Generate Reports
+
+====================================================
+REPORTING SYSTEM
+================
+
+Generate:
+
+Daily Reports
+Weekly Reports
+Monthly Reports
+
+Export:
+
+PDF
+Excel
+
+Include:
+
+Revenue
+Occupancy
+AI Insights
+Zone Statistics
+
+====================================================
+UI/UX COMPLETE REDESIGN
+=======================
+
+Redesign the entire interface.
+
+Inspiration:
+
+Tesla Dashboard
+Apple Design Language
+Modern SaaS Products
+
+Requirements:
+
+Dark Theme
+Glassmorphism
+Responsive Design
+Smooth Animations
+Modern Cards
+Professional Charts
+Notification Center
+Command Palette
+
+The UI should look professional enough to impress recruiters, judges, and investors.
+
+====================================================
+DEMO MODE
+=========
+
+Create simulation engine.
+
+Generate:
+
+Random Vehicles
+Random Occupancy
+Random Revenue
+Random AI Predictions
+
+Allow complete demonstration without hardware.
+
+====================================================
+README OVERHAUL
+===============
+
+Generate:
+
+Professional README
+
+Include:
+
+Project Overview
+Architecture Diagram
+Database Schema
+System Workflow
+AI Features
+Offline Features
+Camera OCR Workflow
+Installation Guide
+Screenshots Section
+Future Scope
+
+====================================================
+FINAL REQUIREMENT
+=================
+
+Do not stop after planning.
+
+Implement all changes directly into the codebase.
+
+Refactor existing code where necessary.
+
+Maintain clean architecture.
+
+Ensure all features are fully integrated and connected.
+
+The final project should feel like a real-world commercial smart parking platform rather than a college project.

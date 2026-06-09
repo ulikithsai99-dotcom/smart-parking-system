@@ -7,281 +7,77 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
-*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; font-family:'Inter',sans-serif; }
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;font-family:'Inter',sans-serif;}
+:root{
+  --bg:#04080f;--surface:rgba(255,255,255,.04);--surface2:rgba(255,255,255,.07);
+  --border:rgba(255,255,255,.08);--border2:rgba(255,255,255,.14);
+  --primary:#2563eb;--cyan:#06b6d4;--text:#f0f4ff;--text-sub:#94a3b8;--text-muted:#64748b;
+  --radius:20px;--radius-sm:12px;--transition:.25s cubic-bezier(.4,0,.2,1);
+}
+body{min-height:100vh;background:var(--bg);color:var(--text);display:flex;align-items:center;justify-content:center;padding:20px;overflow:hidden;}
+.bg-orbs{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;}
+.orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:.6;animation:drift 12s ease-in-out infinite alternate;}
+.orb-1{width:500px;height:500px;background:radial-gradient(circle,rgba(37,99,235,.25),transparent 70%);top:-100px;left:-100px;animation-delay:0s;}
+.orb-2{width:400px;height:400px;background:radial-gradient(circle,rgba(6,182,212,.18),transparent 70%);bottom:-80px;right:-80px;animation-delay:-4s;}
+.orb-3{width:300px;height:300px;background:radial-gradient(circle,rgba(124,58,237,.15),transparent 70%);top:50%;right:20%;animation-delay:-8s;}
+@keyframes drift{from{transform:translate(0,0) scale(1);}to{transform:translate(30px,20px) scale(1.05);}}
+body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(255,255,255,.02) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.02) 1px,transparent 1px);background-size:60px 60px;pointer-events:none;z-index:0;}
 
-:root {
-  --bg:#04080f; --surface:rgba(255,255,255,0.04); --surface2:rgba(255,255,255,0.07);
-  --border:rgba(255,255,255,0.08); --border2:rgba(255,255,255,0.14);
-  --primary:#2563eb; --cyan:#06b6d4; --text:#f0f4ff; --text-sub:#94a3b8; --text-muted:#64748b;
-  --radius:20px; --radius-sm:12px; --transition:0.25s cubic-bezier(0.4,0,0.2,1);
-}
+.wrapper{position:relative;z-index:1;width:100%;max-width:1200px;display:grid;grid-template-columns:1fr 420px;gap:0;border-radius:28px;overflow:hidden;box-shadow:0 0 0 1px var(--border2),0 40px 80px rgba(0,0,0,.6),0 0 120px rgba(37,99,235,.08);animation:fadeInUp .6s ease both;}
+@keyframes fadeInUp{from{opacity:0;transform:translateY(24px);}to{opacity:1;transform:translateY(0);}}
 
-body {
-  min-height:100vh;
-  background:var(--bg);
-  color:var(--text);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding:20px;
-  overflow:hidden;
-}
+.left{background:linear-gradient(145deg,rgba(8,14,28,.98),rgba(4,10,22,.99));border-right:1px solid var(--border);padding:56px 52px;display:flex;flex-direction:column;justify-content:center;gap:0;position:relative;overflow:hidden;}
+.left::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:radial-gradient(ellipse 60% 50% at 10% 20%,rgba(37,99,235,.12) 0%,transparent 70%),radial-gradient(ellipse 40% 40% at 90% 80%,rgba(6,182,212,.08) 0%,transparent 70%);pointer-events:none;}
+.brand-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(37,99,235,.12);border:1px solid rgba(59,130,246,.25);padding:6px 14px;border-radius:100px;font-size:.75rem;font-weight:600;color:#60a5fa;letter-spacing:.05em;text-transform:uppercase;margin-bottom:28px;width:fit-content;}
+.brand-badge .dot{width:6px;height:6px;background:#22c55e;border-radius:50%;animation:pulse-dot 2s infinite;}
+@keyframes pulse-dot{0%,100%{opacity:1;}50%{opacity:.4;}}
+.left h1{font-size:3.2rem;font-weight:900;letter-spacing:-.04em;line-height:1.1;margin-bottom:16px;background:linear-gradient(135deg,#f0f4ff 0%,#93c5fd 50%,#67e8f9 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.tagline{color:var(--text-sub);font-size:1.05rem;line-height:1.7;margin-bottom:40px;max-width:420px;}
+.feature-list{display:flex;flex-direction:column;gap:12px;margin-bottom:44px;}
+.feature-item{display:flex;align-items:center;gap:14px;padding:14px 18px;background:var(--surface);border:1px solid var(--border);border-radius:14px;transition:var(--transition);}
+.feature-item:hover{background:var(--surface2);border-color:var(--border2);}
+.feature-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;}
+.fi-blue{background:rgba(37,99,235,.2);border:1px solid rgba(59,130,246,.3);}
+.fi-cyan{background:rgba(6,182,212,.15);border:1px solid rgba(6,182,212,.3);}
+.fi-green{background:rgba(16,185,129,.15);border:1px solid rgba(16,185,129,.3);}
+.fi-purple{background:rgba(124,58,237,.15);border:1px solid rgba(139,92,246,.3);}
+.feature-text h4{font-size:.9rem;font-weight:600;margin-bottom:2px;}
+.feature-text p{font-size:.78rem;color:var(--text-muted);}
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.stat-pill{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:18px 14px;text-align:center;transition:var(--transition);}
+.stat-pill:hover{border-color:var(--border2);}
+.stat-pill .num{font-size:1.4rem;font-weight:800;letter-spacing:-.02em;background:linear-gradient(135deg,#f0f4ff,#93c5fd);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.stat-pill .lbl{font-size:.72rem;color:var(--text-muted);font-weight:500;margin-top:3px;}
 
-/* Animated background */
-.bg-orbs {
-  position:fixed; inset:0; pointer-events:none; z-index:0; overflow:hidden;
-}
-.orb {
-  position:absolute; border-radius:50%; filter:blur(80px); opacity:0.6;
-  animation:drift 12s ease-in-out infinite alternate;
-}
-.orb-1 { width:500px; height:500px; background:radial-gradient(circle, rgba(37,99,235,0.25), transparent 70%); top:-100px; left:-100px; animation-delay:0s; }
-.orb-2 { width:400px; height:400px; background:radial-gradient(circle, rgba(6,182,212,0.18), transparent 70%); bottom:-80px; right:-80px; animation-delay:-4s; }
-.orb-3 { width:300px; height:300px; background:radial-gradient(circle, rgba(124,58,237,0.15), transparent 70%); top:50%; right:20%; animation-delay:-8s; }
-@keyframes drift { from{transform:translate(0,0) scale(1);} to{transform:translate(30px,20px) scale(1.05);} }
-
-/* Grid pattern */
-body::after {
-  content:'';
-  position:fixed; inset:0;
-  background-image: linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
-  background-size:60px 60px;
-  pointer-events:none; z-index:0;
-}
-
-.wrapper {
-  position:relative; z-index:1;
-  width:100%; max-width:1200px;
-  display:grid;
-  grid-template-columns:1fr 420px;
-  gap:0;
-  border-radius:28px;
-  overflow:hidden;
-  box-shadow:
-    0 0 0 1px var(--border2),
-    0 40px 80px rgba(0,0,0,0.6),
-    0 0 120px rgba(37,99,235,0.08);
-  animation: fadeInUp 0.6s ease both;
-}
-@keyframes fadeInUp { from{opacity:0;transform:translateY(24px);} to{opacity:1;transform:translateY(0);} }
-
-/* LEFT PANEL */
-.left {
-  background: linear-gradient(145deg, rgba(8,14,28,0.98), rgba(4,10,22,0.99));
-  border-right:1px solid var(--border);
-  padding:56px 52px;
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-  gap:0;
-  position:relative;
-  overflow:hidden;
-}
-.left::before {
-  content:'';
-  position:absolute; top:0; left:0; right:0; bottom:0;
-  background:
-    radial-gradient(ellipse 60% 50% at 10% 20%, rgba(37,99,235,0.12) 0%, transparent 70%),
-    radial-gradient(ellipse 40% 40% at 90% 80%, rgba(6,182,212,0.08) 0%, transparent 70%);
-  pointer-events:none;
-}
-
-.brand-badge {
-  display:inline-flex; align-items:center; gap:8px;
-  background:rgba(37,99,235,0.12);
-  border:1px solid rgba(59,130,246,0.25);
-  padding:6px 14px;
-  border-radius:100px;
-  font-size:0.75rem;
-  font-weight:600;
-  color:#60a5fa;
-  letter-spacing:0.05em;
-  text-transform:uppercase;
-  margin-bottom:28px;
-  width:fit-content;
-}
-.brand-badge .dot { width:6px; height:6px; background:#22c55e; border-radius:50%; animation: pulse-dot 2s infinite; }
-@keyframes pulse-dot { 0%,100%{opacity:1;} 50%{opacity:0.4;} }
-
-.left h1 {
-  font-size:3.2rem;
-  font-weight:900;
-  letter-spacing:-0.04em;
-  line-height:1.1;
-  margin-bottom:16px;
-  background:linear-gradient(135deg, #f0f4ff 0%, #93c5fd 50%, #67e8f9 100%);
-  -webkit-background-clip:text;
-  -webkit-text-fill-color:transparent;
-  background-clip:text;
-}
-
-.tagline {
-  color:var(--text-sub);
-  font-size:1.05rem;
-  line-height:1.7;
-  margin-bottom:40px;
-  max-width:420px;
-}
-
-.feature-list { display:flex; flex-direction:column; gap:12px; margin-bottom:44px; }
-.feature-item {
-  display:flex; align-items:center; gap:14px;
-  padding:14px 18px;
-  background:var(--surface);
-  border:1px solid var(--border);
-  border-radius:14px;
-  transition:var(--transition);
-}
-.feature-item:hover { background:var(--surface2); border-color:var(--border2); }
-.feature-icon {
-  width:36px; height:36px; border-radius:10px;
-  display:flex; align-items:center; justify-content:center;
-  font-size:1.1rem; flex-shrink:0;
-}
-.fi-blue { background:rgba(37,99,235,0.2); border:1px solid rgba(59,130,246,0.3); }
-.fi-cyan { background:rgba(6,182,212,0.15); border:1px solid rgba(6,182,212,0.3); }
-.fi-green { background:rgba(16,185,129,0.15); border:1px solid rgba(16,185,129,0.3); }
-.feature-text h4 { font-size:0.9rem; font-weight:600; margin-bottom:2px; }
-.feature-text p { font-size:0.78rem; color:var(--text-muted); }
-
-.stats-row {
-  display:grid; grid-template-columns:repeat(3,1fr); gap:12px;
-}
-.stat-pill {
-  background:var(--surface);
-  border:1px solid var(--border);
-  border-radius:16px;
-  padding:18px 14px;
-  text-align:center;
-  transition:var(--transition);
-}
-.stat-pill:hover { border-color:var(--border2); }
-.stat-pill .num {
-  font-size:1.4rem; font-weight:800; letter-spacing:-0.02em;
-  background:linear-gradient(135deg, #f0f4ff, #93c5fd);
-  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
-}
-.stat-pill .lbl { font-size:0.72rem; color:var(--text-muted); font-weight:500; margin-top:3px; }
-
-/* RIGHT PANEL */
-.right {
-  background:rgba(6,12,24,0.97);
-  padding:52px 44px;
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-  position:relative;
-}
-.right::before {
-  content:'';
-  position:absolute; top:0; left:0; width:1px; bottom:0;
-  background:linear-gradient(180deg, transparent, rgba(59,130,246,0.4), transparent);
-}
-
-.form-header { margin-bottom:36px; }
-.form-header .pill {
-  display:inline-flex; align-items:center; gap:6px;
-  background:rgba(37,99,235,0.12);
-  border:1px solid rgba(59,130,246,0.2);
-  padding:5px 12px; border-radius:8px;
-  font-size:0.72rem; font-weight:700;
-  color:#60a5fa; letter-spacing:0.06em;
-  text-transform:uppercase; margin-bottom:14px;
-}
-.form-header h2 {
-  font-size:1.8rem; font-weight:800;
-  letter-spacing:-0.03em; margin-bottom:6px;
-}
-.form-header p { color:var(--text-sub); font-size:0.9rem; }
-
-.field-wrap { margin-bottom:16px; }
-.field-label {
-  display:block; font-size:0.78rem; font-weight:600;
-  color:var(--text-sub); letter-spacing:0.03em;
-  text-transform:uppercase; margin-bottom:8px;
-}
-.field-input {
-  width:100%; padding:13px 16px;
-  background:rgba(255,255,255,0.04);
-  border:1px solid var(--border2);
-  border-radius:var(--radius-sm);
-  color:var(--text); font-size:0.95rem;
-  font-family:'Inter',sans-serif;
-  outline:none; transition:var(--transition);
-}
-.field-input::placeholder { color:var(--text-muted); }
-.field-input:focus {
-  border-color:#3b82f6;
-  background:rgba(59,130,246,0.06);
-  box-shadow:0 0 0 3px rgba(59,130,246,0.12);
-}
-
-.submit-btn {
-  width:100%; padding:15px;
-  background:linear-gradient(135deg, var(--primary) 0%, var(--cyan) 100%);
-  border:none; border-radius:var(--radius-sm);
-  color:white; font-size:1rem; font-weight:700;
-  font-family:'Inter',sans-serif;
-  cursor:pointer; transition:var(--transition);
-  position:relative; overflow:hidden;
-  letter-spacing:0.01em; margin-top:8px;
-}
-.submit-btn::before {
-  content:''; position:absolute; inset:0;
-  background:linear-gradient(rgba(255,255,255,0.15), transparent);
-  opacity:0; transition:var(--transition);
-}
-.submit-btn:hover { transform:translateY(-2px); box-shadow:0 10px 35px rgba(37,99,235,0.5); }
-.submit-btn:hover::before { opacity:1; }
-.submit-btn:active { transform:translateY(0); }
-
-.quick-links {
-  display:flex; flex-direction:column; gap:8px;
-  margin-top:24px;
-  padding-top:24px;
-  border-top:1px solid var(--border);
-}
-.quick-link {
-  display:flex; align-items:center; gap:10px;
-  color:var(--text-sub); text-decoration:none;
-  padding:11px 14px; border-radius:10px;
-  border:1px solid var(--border);
-  font-size:0.875rem; font-weight:500;
-  transition:var(--transition);
-}
-.quick-link:hover {
-  color:var(--text); background:var(--surface2);
-  border-color:var(--border2); transform:translateX(3px);
-}
-.quick-link .ql-icon { font-size:1rem; width:18px; text-align:center; }
-
-.clock-display {
-  display:flex; align-items:center; gap:8px;
-  margin-top:20px;
-  padding:10px 14px;
-  background:var(--surface);
-  border:1px solid var(--border);
-  border-radius:10px;
-  font-size:0.8rem; color:var(--text-muted);
-}
-.clock-display span { color:var(--text-sub); font-weight:600; }
-
-@media(max-width:900px){
-  .wrapper { grid-template-columns:1fr; }
-  .left { padding:40px 32px; }
-  .left h1 { font-size:2.2rem; }
-  .right { padding:40px 32px; }
-  .left::before { display:none; }
-}
-@media(max-width:480px){
-  .left { padding:32px 24px; }
-  .right { padding:32px 24px; }
-  .stats-row { grid-template-columns:repeat(3,1fr); }
-}
+.right{background:rgba(6,12,24,.97);padding:52px 44px;display:flex;flex-direction:column;justify-content:center;position:relative;}
+.right::before{content:'';position:absolute;top:0;left:0;width:1px;bottom:0;background:linear-gradient(180deg,transparent,rgba(59,130,246,.4),transparent);}
+.form-header{margin-bottom:28px;}
+.form-header .pill{display:inline-flex;align-items:center;gap:6px;background:rgba(37,99,235,.12);border:1px solid rgba(59,130,246,.2);padding:5px 12px;border-radius:8px;font-size:.72rem;font-weight:700;color:#60a5fa;letter-spacing:.06em;text-transform:uppercase;margin-bottom:14px;}
+.form-header h2{font-size:1.8rem;font-weight:800;letter-spacing:-.03em;margin-bottom:6px;}
+.form-header p{color:var(--text-sub);font-size:.9rem;}
+.field-wrap{margin-bottom:16px;}
+.field-label{display:block;font-size:.78rem;font-weight:600;color:var(--text-sub);letter-spacing:.03em;text-transform:uppercase;margin-bottom:8px;}
+.field-input{width:100%;padding:13px 16px;background:rgba(255,255,255,.04);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-size:.95rem;font-family:'Inter',sans-serif;outline:none;transition:var(--transition);}
+.field-input::placeholder{color:var(--text-muted);}
+.field-input:focus{border-color:#3b82f6;background:rgba(59,130,246,.06);box-shadow:0 0 0 3px rgba(59,130,246,.12);}
+.submit-btn{width:100%;padding:15px;background:linear-gradient(135deg,var(--primary) 0%,var(--cyan) 100%);border:none;border-radius:var(--radius-sm);color:white;font-size:1rem;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;transition:var(--transition);position:relative;overflow:hidden;letter-spacing:.01em;margin-top:8px;}
+.submit-btn::before{content:'';position:absolute;inset:0;background:linear-gradient(rgba(255,255,255,.15),transparent);opacity:0;transition:var(--transition);}
+.submit-btn:hover{transform:translateY(-2px);box-shadow:0 10px 35px rgba(37,99,235,.5);}
+.submit-btn:hover::before{opacity:1;}
+.submit-btn:active{transform:translateY(0);}
+.quick-links{display:flex;flex-direction:column;gap:8px;margin-top:24px;padding-top:24px;border-top:1px solid var(--border);}
+.quick-link{display:flex;align-items:center;gap:10px;color:var(--text-sub);text-decoration:none;padding:11px 14px;border-radius:10px;border:1px solid var(--border);font-size:.875rem;font-weight:500;transition:var(--transition);}
+.quick-link:hover{color:var(--text);background:var(--surface2);border-color:var(--border2);transform:translateX(3px);}
+.quick-link .ql-icon{font-size:1rem;width:18px;text-align:center;}
+.clock-display{display:flex;align-items:center;gap:8px;margin-top:20px;padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-radius:10px;font-size:.8rem;color:var(--text-muted);}
+.clock-display span{color:var(--text-sub);font-weight:600;}
+.error-banner{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.25);border-radius:12px;padding:12px 16px;margin-bottom:16px;color:#fca5a5;font-size:.85rem;font-weight:600;display:flex;align-items:center;gap:10px;}
+.avail-badge{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:100px;font-size:.72rem;font-weight:700;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.2);color:#34d399;margin-top:4px;}
+@media(max-width:900px){.wrapper{grid-template-columns:1fr;}.left{padding:40px 32px;}.left h1{font-size:2.2rem;}.right{padding:40px 32px;}.left::before{display:none;}}
+@media(max-width:480px){.left{padding:32px 24px;}.right{padding:32px 24px;}}
 </style>
 </head>
 <body>
-
 <div class="bg-orbs">
   <div class="orb orb-1"></div>
   <div class="orb orb-2"></div>
@@ -290,54 +86,31 @@ body::after {
 
 <div class="wrapper">
   <div class="left">
-    <div class="brand-badge">
-      <span class="dot"></span>
-      System Online
-    </div>
-
+    <div class="brand-badge"><span class="dot"></span> System Online</div>
     <h1>Smart Parking<br>System</h1>
-
-    <p class="tagline">
-      Real-time slot management, automated allocation, and intelligent monitoring — all in one platform.
-    </p>
-
+    <p class="tagline">Real-time slot management, automated allocation, and intelligent monitoring — all in one platform.</p>
     <div class="feature-list">
       <div class="feature-item">
-        <div class="feature-icon fi-blue">🎯</div>
-        <div class="feature-text">
-          <h4>Auto Slot Assignment</h4>
-          <p>Instantly finds the next available slot</p>
-        </div>
+        <div class="feature-icon fi-blue">🤖</div>
+        <div class="feature-text"><h4>AI Slot Assignment</h4><p>Smart zone-aware allocation with peak prediction</p></div>
       </div>
       <div class="feature-item">
         <div class="feature-icon fi-cyan">📡</div>
-        <div class="feature-text">
-          <h4>Real-Time Map</h4>
-          <p>Live visual grid of all 200 parking slots</p>
-        </div>
+        <div class="feature-text"><h4>Real-Time Map</h4><p>Live visual grid of all 200 parking slots</p></div>
       </div>
       <div class="feature-item">
-        <div class="feature-icon fi-green">🔒</div>
-        <div class="feature-text">
-          <h4>Staff Reservations</h4>
-          <p>Priority slots for employees & staff</p>
-        </div>
+        <div class="feature-icon fi-green">💰</div>
+        <div class="feature-text"><h4>Smart Billing</h4><p>Automatic hourly/daily billing on exit</p></div>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon fi-purple">🔒</div>
+        <div class="feature-text"><h4>Staff Reservations</h4><p>Priority slots for employees & staff</p></div>
       </div>
     </div>
-
     <div class="stats-row">
-      <div class="stat-pill">
-        <div class="num">200</div>
-        <div class="lbl">Total Slots</div>
-      </div>
-      <div class="stat-pill">
-        <div class="num">24/7</div>
-        <div class="lbl">Monitoring</div>
-      </div>
-      <div class="stat-pill">
-        <div class="num" id="liveTime">--:--</div>
-        <div class="lbl">Current Time</div>
-      </div>
+      <div class="stat-pill"><div class="num">200</div><div class="lbl">Total Slots</div></div>
+      <div class="stat-pill"><div class="num" id="liveAvail">—</div><div class="lbl">Available</div></div>
+      <div class="stat-pill"><div class="num" id="liveTime">--:--</div><div class="lbl">Current Time</div></div>
     </div>
   </div>
 
@@ -345,65 +118,86 @@ body::after {
     <div class="form-header">
       <div class="pill">🅿 Parking Entry</div>
       <h2>Park Your Vehicle</h2>
-      <p>Fill in your details to get an auto-assigned slot</p>
+      <p>Fill in your details to get an AI-assigned slot</p>
     </div>
 
-    <form action="/submit" method="POST">
+    <div id="errorBanner" class="error-banner" style="display:none;"></div>
+
+    <form action="/submit" method="POST" id="parkForm">
       <div class="field-wrap">
         <label class="field-label">Full Name</label>
-        <input class="field-input" name="name" placeholder="e.g. John Smith" required>
+        <input class="field-input" name="name" id="nameField" placeholder="e.g. John Smith" required autocomplete="name">
       </div>
       <div class="field-wrap">
         <label class="field-label">Phone Number</label>
-        <input class="field-input" name="phone" placeholder="10-digit mobile number" required>
+        <input class="field-input" name="phone" placeholder="10-digit mobile number" maxlength="10" pattern="\d{10}">
       </div>
       <div class="field-wrap">
         <label class="field-label">Vehicle Number</label>
-        <input class="field-input" name="vehicle" placeholder="e.g. MH12AB1234" required>
+        <input class="field-input" name="vehicle" id="vehicleField" placeholder="e.g. MH12AB1234" required autocomplete="off" style="text-transform:uppercase;" oninput="this.value=this.value.toUpperCase()">
       </div>
-      <button type="submit" class="submit-btn">
-        Find &amp; Assign Slot →
-      </button>
+      <button type="submit" class="submit-btn" id="submitBtn">Find &amp; Assign Slot →</button>
     </form>
 
     <div class="quick-links">
-      <a href="/reserve" class="quick-link">
-        <span class="ql-icon">🏢</span>
-        Staff Reservation
-      </a>
-      <a href="/map" class="quick-link">
-        <span class="ql-icon">📍</span>
-        View Live Parking Map
-      </a>
-      <a href="/exit" class="quick-link">
-        <span class="ql-icon">🚪</span>
-        Vehicle Exit
-      </a>
-      <a href="/search" class="quick-link">
-        <span class="ql-icon">🔍</span>
-        Search Vehicle
-      </a>
-      <a href="/admin" class="quick-link">
-        <span class="ql-icon">🔐</span>
-        Admin Portal
-      </a>
+      <a href="/reserve" class="quick-link"><span class="ql-icon">🏢</span>Staff Reservation</a>
+      <a href="/map" class="quick-link"><span class="ql-icon">📍</span>View Live Parking Map</a>
+      <a href="/exit" class="quick-link"><span class="ql-icon">🚪</span>Vehicle Exit</a>
+      <a href="/search" class="quick-link"><span class="ql-icon">🔍</span>Search Vehicle</a>
+      <a href="/admin" class="quick-link"><span class="ql-icon">🔐</span>Admin Portal</a>
     </div>
 
-    <div class="clock-display">
-      🕐 <span id="liveClock">--:-- --</span> &nbsp;·&nbsp; <span id="liveDate">-- --- ----</span>
-    </div>
+    <div class="clock-display">🕐 <span id="liveClock">--:-- --</span> &nbsp;·&nbsp; <span id="liveDate">-- --- ----</span></div>
   </div>
 </div>
 
 <script>
-function updateTime() {
-  const now = new Date();
-  document.getElementById('liveClock').textContent = now.toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
-  document.getElementById('liveDate').textContent = now.toLocaleDateString('en-IN', {day:'2-digit', month:'short', year:'numeric'});
-  document.getElementById('liveTime').textContent = now.toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit', hour12:false});
+function updateTime(){
+  const now=new Date();
+  document.getElementById('liveClock').textContent=now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  document.getElementById('liveDate').textContent=now.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
+  document.getElementById('liveTime').textContent=now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:false});
 }
-setInterval(updateTime, 1000);
-updateTime();
+setInterval(updateTime,1000);updateTime();
+
+// Load live availability
+async function loadAvail(){
+  try{
+    const r=await fetch('/api/insights');
+    const d=await r.json();
+    document.getElementById('liveAvail').textContent=d.available;
+  }catch(_){}
+}
+loadAvail();setInterval(loadAvail,20000);
+
+// Handle URL params
+const params=new URLSearchParams(window.location.search);
+const errMsg=params.get('error');
+const vehicle=params.get('v')||params.get('vehicle');
+
+if(vehicle){
+  document.getElementById('vehicleField').value=vehicle.toUpperCase();
+}
+
+const errorMessages={
+  fields:'All fields are required',
+  phone:'Phone number must be exactly 10 digits',
+  duplicate:`Vehicle ${vehicle||''} is already parked`,
+  full:'Parking is currently full — no available slots',
+};
+if(errMsg&&errorMessages[errMsg]){
+  const banner=document.getElementById('errorBanner');
+  banner.textContent='❌ '+errorMessages[errMsg];
+  banner.style.display='flex';
+}
+
+// Submit feedback
+document.getElementById('parkForm').addEventListener('submit',function(){
+  const btn=document.getElementById('submitBtn');
+  btn.textContent='Assigning slot...';
+  btn.disabled=true;
+  btn.style.opacity='.7';
+});
 </script>
 </body>
 </html>

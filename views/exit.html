@@ -7,22 +7,70 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/css/style.css">
+<style>
+.page{min-height:100vh;display:flex;justify-content:center;align-items:center;padding:20px;position:relative;z-index:1;}
+.glass-card{width:480px;max-width:100%;padding:48px 44px;border-radius:28px;background:rgba(8,14,30,.9);border:1px solid rgba(255,255,255,.14);backdrop-filter:blur(40px);box-shadow:0 0 0 1px rgba(37,99,235,.1),0 25px 60px rgba(0,0,0,.6);text-align:center;position:relative;overflow:hidden;}
+.glass-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(245,158,11,.6),transparent);}
+.icon-wrap{width:72px;height:72px;background:linear-gradient(135deg,rgba(245,158,11,.2),rgba(239,68,68,.12));border:1px solid rgba(245,158,11,.3);border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:2rem;margin:0 auto 24px;box-shadow:0 0 40px rgba(245,158,11,.15);}
+h1{font-size:1.75rem;font-weight:800;margin-bottom:8px;letter-spacing:-.02em;}
+p{color:#94a3b8;margin-bottom:28px;font-size:.95rem;}
+.field-input{width:100%;padding:14px 18px;border:1px solid rgba(255,255,255,.14);border-radius:12px;background:rgba(255,255,255,.05);color:#f0f4ff;font-size:1rem;font-family:Inter,sans-serif;outline:none;transition:.2s;text-transform:uppercase;margin-bottom:12px;}
+.field-input::placeholder{color:#64748b;}
+.field-input:focus{border-color:#f59e0b;background:rgba(245,158,11,.06);box-shadow:0 0 0 3px rgba(245,158,11,.12);}
+.submit-btn{width:100%;padding:15px;background:linear-gradient(135deg,#f59e0b,#d97706);border:none;border-radius:12px;color:white;font-size:1rem;font-weight:700;font-family:Inter,sans-serif;cursor:pointer;transition:.2s;letter-spacing:.01em;}
+.submit-btn:hover{transform:translateY(-2px);box-shadow:0 10px 35px rgba(245,158,11,.4);}
+.submit-btn:disabled{opacity:.6;cursor:not-allowed;transform:none;}
+.links{margin-top:24px;padding-top:20px;border-top:1px solid rgba(255,255,255,.06);display:flex;flex-direction:column;gap:8px;}
+.links a{display:flex;align-items:center;justify-content:center;gap:8px;padding:11px 14px;border-radius:10px;border:1px solid rgba(255,255,255,.08);color:#94a3b8;text-decoration:none;font-size:.875rem;font-weight:500;transition:.2s;}
+.links a:hover{color:#f0f4ff;background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.14);}
+.error-banner{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.25);border-radius:12px;padding:12px 16px;margin-bottom:16px;color:#fca5a5;font-size:.85rem;font-weight:600;}
+.info-box{background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.15);border-radius:12px;padding:12px 16px;margin-bottom:20px;font-size:.82rem;color:#fcd34d;text-align:left;}
+</style>
 </head>
 <body>
 <div class="page">
   <div class="glass-card">
     <div class="icon-wrap">🚪</div>
     <h1>Vehicle Exit</h1>
-    <p>Enter the vehicle number to release its parking slot</p>
-    <form action="/exitVehicle" method="POST">
-      <input type="text" name="vehicle" placeholder="e.g. MH12AB1234" required autocomplete="off" style="text-transform:uppercase;">
-      <button type="submit">Process Exit →</button>
+    <p>Enter the vehicle number to process exit and calculate your bill</p>
+
+    <div id="errorBanner" class="error-banner" style="display:none;"></div>
+
+    <div class="info-box">
+      💡 Billing is calculated automatically — you'll see the full receipt after processing.
+    </div>
+
+    <form action="/exitVehicle" method="POST" id="exitForm">
+      <input class="field-input" type="text" name="vehicle" id="vehicleField" placeholder="e.g. MH12AB1234" required autocomplete="off">
+      <button type="submit" class="submit-btn" id="exitBtn">Process Exit &amp; Calculate Bill →</button>
     </form>
-    <div class="links" style="margin-top:20px;">
+
+    <div class="links">
       <a href="/user">← User Portal</a>
+      <a href="/search">🔍 Search Vehicle</a>
       <a href="/map">📍 Live Map</a>
     </div>
   </div>
 </div>
+
+<script>
+const params=new URLSearchParams(window.location.search);
+const err=params.get('error');
+const v=params.get('v');
+if(v) document.getElementById('vehicleField').value=v.toUpperCase();
+if(err==='notfound'){
+  const b=document.getElementById('errorBanner');
+  b.textContent=`❌ Vehicle "${v||'entered'}" is not currently parked`;
+  b.style.display='block';
+}
+document.getElementById('vehicleField').addEventListener('input',function(){
+  this.value=this.value.toUpperCase();
+});
+document.getElementById('exitForm').addEventListener('submit',function(){
+  const btn=document.getElementById('exitBtn');
+  btn.textContent='Processing...';
+  btn.disabled=true;
+});
+</script>
 </body>
 </html>
