@@ -11,7 +11,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(
   session({
-    secret: "smartparkingsecret",
+    secret: process.env.SESSION_SECRET || "smartparkingsecret",
     resave: false,
     saveUninitialized: true
   })
