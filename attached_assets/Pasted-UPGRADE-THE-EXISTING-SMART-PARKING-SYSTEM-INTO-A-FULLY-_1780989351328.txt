@@ -1,0 +1,362 @@
+UPGRADE THE EXISTING SMART PARKING SYSTEM INTO A FULLY OFFLINE, AI-POWERED INTELLIGENT PARKING PLATFORM.
+
+DO NOT REMOVE EXISTING FEATURES.
+
+Instead, redesign and extend the current architecture with the following capabilities.
+
+===================================================
+OFFLINE-FIRST ARCHITECTURE
+==========================
+
+The entire platform must operate without internet.
+
+Requirements:
+
+* Store all data locally using SQLite.
+* Run backend on FastAPI.
+* Dashboard accessible through local WiFi network.
+* Continue functioning even if internet is unavailable.
+* Implement local caching.
+* Implement optional cloud synchronization when internet returns.
+* No feature should depend on external APIs.
+
+===================================================
+PARKING LAYOUT
+==============
+
+Create 4 independent parking zones:
+
+ZONE A
+ZONE B
+ZONE C
+ZONE D
+
+Each zone contains:
+
+50 parking slots
+
+Total capacity:
+
+200 slots
+
+Example:
+
+Zone A:
+A1-A50
+
+Zone B:
+B1-B50
+
+Zone C:
+C1-C50
+
+Zone D:
+D1-D50
+
+===================================================
+SMART ZONE DASHBOARD
+====================
+
+Main Dashboard should show:
+
+Total Capacity
+Occupied Slots
+Available Slots
+Revenue Today
+Revenue This Month
+AI Predictions
+
+Display zone cards:
+
+Zone A
+Zone B
+Zone C
+Zone D
+
+Each card shows:
+
+Occupancy
+Availability
+Percentage Filled
+
+Clicking a zone should open a dedicated zone page showing all 50 slots visually.
+
+Visual representation:
+
+Green = Available
+Red = Occupied
+Yellow = Reserved
+Blue = Recommended Slot
+
+Enable:
+
+Zoom
+Search Slot
+Filter Available Slots
+
+===================================================
+AUTOMATIC NUMBER PLATE RECOGNITION
+==================================
+
+Create Camera Mode.
+
+Admin can:
+
+Open camera
+Upload image
+Use webcam
+
+System should:
+
+Detect vehicle number plate
+Extract registration number using OCR
+
+Suggested stack:
+
+OpenCV
+EasyOCR
+
+Workflow:
+
+Vehicle arrives
+Camera scans plate
+Plate number extracted
+System checks database
+System assigns optimal parking slot automatically
+
+Example:
+
+KA01AB1234
+
+Detected Successfully
+
+Assigned Slot:
+
+B17
+
+===================================================
+SMART SLOT ASSIGNMENT ENGINE
+============================
+
+Create intelligent slot allocation.
+
+Rules:
+
+1. Fill parking systematically.
+
+2. Prioritize nearest available slot.
+
+3. Balance occupancy across zones.
+
+4. Prevent one zone from filling completely while others remain empty.
+
+5. Allow admin to switch:
+
+Nearest Slot Mode
+
+Balanced Occupancy Mode
+
+VIP Reservation Mode
+
+AI should automatically recommend the best slot.
+
+===================================================
+LIVE VEHICLE TRACKING
+=====================
+
+Store:
+
+Vehicle Number
+Entry Time
+Exit Time
+Zone
+Assigned Slot
+Duration
+
+Search by:
+
+Vehicle Number
+Slot Number
+Date
+
+===================================================
+SMART BILLING SYSTEM
+====================
+
+Create configurable pricing engine.
+
+Admin can configure:
+
+Hourly Rate
+Daily Rate
+
+Example:
+
+Hourly Rate:
+₹20/hour
+
+Daily Rate:
+₹250/day
+
+Pricing should be editable from Admin Settings.
+
+===================================================
+AUTO BILL GENERATION
+====================
+
+On vehicle exit:
+
+Calculate:
+
+Parking Duration
+Total Amount
+
+Generate receipt:
+
+Vehicle Number
+Entry Time
+Exit Time
+Duration
+Rate Applied
+Final Charge
+
+Provide:
+
+Print Receipt
+Download PDF
+
+===================================================
+AI PREDICTION MODULE
+====================
+
+Train local ML model using parking history.
+
+Predict:
+
+Next Hour Occupancy
+Next Day Occupancy
+Peak Hours
+Zone Utilization
+
+Display:
+
+Predicted Demand
+Suggested Zone Expansion
+Expected Free Slots
+
+===================================================
+ANOMALY DETECTION
+=================
+
+Detect:
+
+Vehicle parked unusually long
+Sensor failure
+Zone overload
+Camera failure
+Unexpected occupancy spikes
+
+Generate alerts.
+
+===================================================
+ADMIN PANEL
+===========
+
+Admin can:
+
+Add Slots
+Remove Slots
+Add Zones
+Disable Zones
+Configure Camera
+Configure Billing
+Manage Vehicles
+Generate Reports
+Export Data
+
+===================================================
+REPORTING MODULE
+================
+
+Generate:
+
+Daily Report
+Weekly Report
+Monthly Report
+
+Include:
+
+Revenue
+Occupancy
+Zone Statistics
+AI Insights
+
+Export:
+
+PDF
+Excel
+
+===================================================
+UI REQUIREMENTS
+===============
+
+Design should feel like:
+
+Tesla Fleet Dashboard
+Airport Parking Management System
+Modern SaaS Platform
+
+Use:
+
+React
+TypeScript
+Tailwind CSS
+Framer Motion
+
+Features:
+
+Dark Theme
+Glassmorphism
+Responsive Design
+Smooth Animations
+Professional Charts
+Live Notifications
+
+===================================================
+DEMO MODE
+=========
+
+Create simulation mode.
+
+Generate:
+
+Random Vehicles
+Random Entries
+Random Exits
+
+Simulate:
+
+Camera Detection
+Slot Assignment
+Revenue Generation
+
+Allow complete demonstration without hardware.
+
+===================================================
+OUTPUT REQUIREMENTS
+===================
+
+Generate:
+
+Full Folder Structure
+Frontend Code
+Backend Code
+Database Schema
+FastAPI APIs
+OCR Pipeline
+AI Pipeline
+Billing Engine
+Zone Management Logic
+Deployment Instructions
+
+Code must be production-ready, modular, scalable, and suitable for hackathons, college projects, exhibitions, and portfolio showcases.

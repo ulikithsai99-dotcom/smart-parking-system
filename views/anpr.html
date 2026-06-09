@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>ANPR Scanner — Smart Parking AI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/style.css">
+<style>
+body::before { content:''; position:fixed; inset:0; background:radial-gradient(ellipse 70% 50% at 20% 20%,rgba(37,99,235,.1) 0%,transparent 60%),radial-gradient(ellipse 50% 50% at 80% 80%,rgba(6,182,212,.07) 0%,transparent 60%); pointer-events:none; z-index:0; }
+
+.anpr-zone { border:2px dashed rgba(59,130,246,.3); border-radius:20px; padding:32px; text-align:center; background:rgba(37,99,235,.04); transition:.3s; cursor:pointer; }
+.anpr-zone:hover, .anpr-zone.drag-over { border-color:rgba(59,130,246,.7); background:rgba(37,99,235,.08); }
+.anpr-zone.has-image { border-color:rgba(16,185,129,.5); background:rgba(16,185,129,.05); }
+
+.cam-preview { width:100%; max-height:280px; border-radius:14px; object-fit:contain; display:none; margin-bottom:14px; border:1px solid rgba(255,255,255,.1); }
+#preview-img { width:100%; max-height:220px; border-radius:12px; object-fit:contain; display:none; margin-top:14px; }
+
+.result-card { background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.1); border-radius:18px; padding:24px; margin-top:20px; display:none; }
+.plate-display { font-size:2.2rem; font-weight:900; letter-spacing:.12em; color:#f0f4ff; background:rgba(6,12,24,.8); border:2px solid rgba(59,130,246,.4); border-radius:12px; padding:14px 28px; display:inline-block; margin:12px auto; font-family:'Courier New',monospace; }
+.slot-recommend { background:linear-gradient(135deg,rgba(37,99,235,.12),rgba(6,182,212,.08)); border:1px solid rgba(59,130,246,.25); border-radius:14px; padding:16px 22px; margin-top:14px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; }
+
+.tab-btn { padding:9px 20px; border-radius:8px; border:1px solid rgba(255,255,255,.1); background:transparent; color:#94a3b8; font-size:.85rem; font-weight:600; cursor:pointer; transition:.2s; font-family:Inter,sans-serif; }
+.tab-btn.active { background:rgba(37,99,235,.15); border-color:rgba(59,130,246,.35); color:#93c5fd; }
+.tab-btn:hover:not(.active) { background:rgba(255,255,255,.06); color:#f0f4ff; }
+
+.scan-btn { width:100%; padding:14px; border:none; border-radius:12px; background:linear-gradient(135deg,#2563eb,#06b6d4); color:white; font-size:1rem; font-weight:700; font-family:Inter,sans-serif; cursor:pointer; transition:.2s; margin-top:14px; }
+.scan-btn:hover { transform:translateY(-2px); box-shadow:0 8px 28px rgba(37,99,235,.45); }
+.scan-btn:disabled { opacity:.5; cursor:not-allowed; transform:none; }
+
+.scan-anim { display:none; text-align:center; padding:20px; }
+.scan-bar { width:80%; height:3px; background:rgba(255,255,255,.06); border-radius:2px; margin:10px auto; overflow:hidden; }
+.scan-progress { height:100%; background:linear-gradient(90deg,#2563eb,#06b6d4); border-radius:2px; animation:scan 1.5s ease-in-out infinite; }
+@keyframes scan { 0%{width:0%;margin-left:0%} 50%{width:60%;margin-left:20%} 100%{width:0%;margin-left:100%} }
+
+.history-item { display:flex; align-items:center; gap:14px; padding:14px; background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.06); border-radius:12px; margin-bottom:8px; }
+.history-plate { font-weight:900; font-size:1rem; letter-spacing:.08em; color:#f0f4ff; font-family:'Courier New',monospace; }
+</style>
+</head>
+<body>
+<div class="dashboard">
+  <div class="sidebar">
+    <div class="sidebar-logo"><div class="logo-icon">🚗</div><div><h2>Smart Parking</h2><small>AI Platform</small></div></div>
+    <div class="nav-label">Overview</div>
+    <a href="/dashboard"><span class="nav-icon">🏠</span> Dashboard</a>
+    <div class="nav-label">Management</div>
+    <a href="/history"><span class="nav-icon">📜</span> History</a>
+    <a href="/stats"><span class="nav-icon">📊</span> Statistics</a>
+    <a href="/map"><span class="nav-icon">🗺️</span> Live Map</a>
+    <a href="/report"><span class="nav-icon">📈</span> Reports</a>
+    <div class="nav-label">Tools</div>
+    <a href="/anpr" class="active"><span class="nav-icon">📷</span> ANPR Scanner</a>
+    <a href="/demo"><span class="nav-icon">🎮</span> Demo Mode</a>
+    <a href="/admin/settings"><span class="nav-icon">⚙️</span> Settings</a>
+    <div class="nav-label">User Portal</div>
+    <a href="/user"><span class="nav-icon">👤</span> Park Vehicle</a>
+    <a href="/exit"><span class="nav-icon">🚪</span> Vehicle Exit</a>
+    <div style="margin-top:auto;padding-top:20px;border-top:1px solid rgba(255,255,255,.06);">
+      <a href="/logout" style="display:flex;align-items:center;gap:10px;color:#f87171;text-decoration:none;padding:12px 16px;border-radius:12px;font-size:.9rem;font-weight:500;border:1px solid rgba(239,68,68,.15);background:rgba(239,68,68,.05);">⏻ Logout</a>
+    </div>
+  </div>
+
+  <div class="main" style="position:relative;z-index:1;overflow-y:auto;">
+    <div class="page-header">
+      <h1>📷 ANPR Scanner</h1>
+      <p style="color:#94a3b8;margin-top:5px">Automatic Number Plate Recognition — Scan & assign slots instantly</p>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 360px;gap:20px;align-items:start;" class="anpr-grid">
+      <!-- Main Scanner Panel -->
+      <div>
+        <div style="background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.07);border-radius:20px;padding:24px;margin-bottom:20px;">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;flex-wrap:wrap;">
+            <button class="tab-btn active" onclick="switchTab('upload')">📤 Upload Image</button>
+            <button class="tab-btn" onclick="switchTab('camera')">📸 Live Camera</button>
+            <button class="tab-btn" onclick="switchTab('simulate')">🎲 Simulate</button>
+          </div>
+
+          <!-- Upload Tab -->
+          <div id="tab-upload">
+            <div class="anpr-zone" id="dropZone" onclick="document.getElementById('fileInput').click()" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="handleDrop(event)">
+              <div style="font-size:3rem;margin-bottom:12px">📸</div>
+              <div style="font-weight:700;font-size:1rem;margin-bottom:6px">Drop plate image here</div>
+              <div style="font-size:.85rem;color:#64748b">or click to browse — supports JPG, PNG, WebP</div>
+              <input type="file" id="fileInput" accept="image/*" style="display:none" onchange="handleFile(this.files[0])">
+            </div>
+            <img id="preview-img" alt="Preview">
+            <button class="scan-btn" id="scanBtn" onclick="scanPlate()" disabled>🔍 Detect Plate & Suggest Slot</button>
+          </div>
+
+          <!-- Camera Tab -->
+          <div id="tab-camera" style="display:none">
+            <div style="border-radius:16px;overflow:hidden;background:#000;position:relative;margin-bottom:14px;">
+              <video id="cameraFeed" class="cam-preview" style="display:block;" autoplay muted></video>
+              <div id="cameraOff" style="padding:60px;text-align:center;color:#64748b;">
+                <div style="font-size:3rem;margin-bottom:10px;">📷</div>
+                <div style="font-weight:600">Camera not started</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:10px;">
+              <button class="scan-btn" style="flex:1" onclick="startCamera()">📷 Start Camera</button>
+              <button class="scan-btn" style="flex:1;background:linear-gradient(135deg,#059669,#10b981)" onclick="captureFrame()">📸 Capture & Scan</button>
+            </div>
+          </div>
+
+          <!-- Simulate Tab -->
+          <div id="tab-simulate" style="display:none">
+            <div style="background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.2);border-radius:14px;padding:20px;text-align:center;margin-bottom:16px;">
+              <div style="font-size:2.5rem;margin-bottom:8px">🎲</div>
+              <div style="font-weight:700;font-size:.95rem;margin-bottom:6px">Simulation Mode</div>
+              <div style="font-size:.82rem;color:#94a3b8">Generates a realistic Indian vehicle plate number and suggests the optimal slot using the AI engine. Perfect for demos & exhibitions.</div>
+            </div>
+            <div style="margin-bottom:14px;">
+              <label style="display:block;font-size:.78rem;font-weight:700;color:#94a3b8;letter-spacing:.04em;text-transform:uppercase;margin-bottom:8px">Manual Plate Override (optional)</label>
+              <input type="text" id="manualPlate" placeholder="e.g. KA01AB1234 — leave blank to auto-generate" style="width:100%;padding:12px 16px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.14);border-radius:10px;color:#f0f4ff;font-size:.9rem;outline:none;font-family:Inter,sans-serif;">
+            </div>
+            <button class="scan-btn" onclick="simulateScan()">🤖 Run AI Simulation</button>
+          </div>
+
+          <!-- Scan Animation -->
+          <div class="scan-anim" id="scanAnim">
+            <div style="font-size:2rem;margin-bottom:8px">🔍</div>
+            <div style="font-weight:700;margin-bottom:4px">Analyzing plate...</div>
+            <div class="scan-bar"><div class="scan-progress"></div></div>
+          </div>
+
+          <!-- Result -->
+          <div class="result-card" id="resultCard">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+              <div style="width:40px;height:40px;border-radius:12px;background:rgba(16,185,129,.15);border:1px solid rgba(16,185,129,.3);display:flex;align-items:center;justify-content:center;font-size:1.3rem;">✅</div>
+              <div><div style="font-weight:800;font-size:.95rem">Plate Detected</div><div style="font-size:.76rem;color:#64748b" id="methodLabel">—</div></div>
+              <span id="confidenceBadge" style="margin-left:auto;font-size:.75rem;font-weight:700;padding:4px 12px;border-radius:100px;background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.25);color:#34d399;">85%</span>
+            </div>
+            <div style="text-align:center;margin-bottom:16px;">
+              <div style="font-size:.72rem;color:#64748b;letter-spacing:.05em;text-transform:uppercase;margin-bottom:8px;">Detected Plate Number</div>
+              <div class="plate-display" id="detectedPlate">—</div>
+            </div>
+            <div class="slot-recommend">
+              <div>
+                <div style="font-size:.72rem;color:#64748b;letter-spacing:.04em;text-transform:uppercase;margin-bottom:4px;">🤖 AI Recommended Slot</div>
+                <div style="font-size:1.5rem;font-weight:900;color:#60a5fa;" id="suggestedSlot">—</div>
+              </div>
+              <a id="proceedBtn" href="/user" style="padding:10px 20px;background:linear-gradient(135deg,#2563eb,#06b6d4);border-radius:10px;color:white;text-decoration:none;font-weight:700;font-size:.85rem;">Park This Vehicle →</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right sidebar -->
+      <div>
+        <!-- Info Panel -->
+        <div style="background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.07);border-radius:18px;padding:20px;margin-bottom:16px;">
+          <h3 style="font-size:.8rem;font-weight:700;color:#64748b;letter-spacing:.06em;text-transform:uppercase;margin-bottom:16px">How It Works</h3>
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <div style="display:flex;align-items:flex-start;gap:12px;">
+              <div style="width:32px;height:32px;border-radius:8px;background:rgba(37,99,235,.15);border:1px solid rgba(59,130,246,.3);display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0;">1</div>
+              <div><div style="font-weight:600;font-size:.85rem">Upload or Capture</div><div style="font-size:.75rem;color:#64748b;margin-top:2px">Photo of vehicle plate from any angle</div></div>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:12px;">
+              <div style="width:32px;height:32px;border-radius:8px;background:rgba(6,182,212,.12);border:1px solid rgba(6,182,212,.3);display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0;">2</div>
+              <div><div style="font-weight:600;font-size:.85rem">OCR Extraction</div><div style="font-size:.75rem;color:#64748b;margin-top:2px">AI reads the plate number from image</div></div>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:12px;">
+              <div style="width:32px;height:32px;border-radius:8px;background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.3);display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0;">3</div>
+              <div><div style="font-weight:600;font-size:.85rem">Slot Assignment</div><div style="font-size:.75rem;color:#64748b;margin-top:2px">AI engine assigns optimal slot based on demand</div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Scans -->
+        <div style="background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.07);border-radius:18px;padding:20px;">
+          <h3 style="font-size:.8rem;font-weight:700;color:#64748b;letter-spacing:.06em;text-transform:uppercase;margin-bottom:14px">Recent Scans</h3>
+          <div id="scanHistory">
+            <div style="text-align:center;padding:20px;color:#64748b;font-size:.85rem">No scans yet</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+@media(max-width:768px){.anpr-grid{grid-template-columns:1fr!important;}}
+</style>
+
+<script>
+let selectedFile = null;
+let scanHistory = [];
+let stream = null;
+
+function switchTab(tab) {
+  ['upload','camera','simulate'].forEach(t => {
+    document.getElementById('tab-'+t).style.display = t===tab?'block':'none';
+  });
+  document.querySelectorAll('.tab-btn').forEach((btn,i) => {
+    btn.classList.toggle('active', ['upload','camera','simulate'][i] === tab);
+  });
+  if(tab !== 'camera' && stream) {
+    stream.getTracks().forEach(t=>t.stop());
+    stream = null;
+  }
+}
+
+function handleFile(file) {
+  if(!file) return;
+  selectedFile = file;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const img = document.getElementById('preview-img');
+    img.src = e.target.result; img.style.display='block';
+    document.getElementById('dropZone').classList.add('has-image');
+    document.getElementById('scanBtn').disabled = false;
+  };
+  reader.readAsDataURL(file);
+}
+
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('dropZone').classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if(file && file.type.startsWith('image/')) handleFile(file);
+}
+
+async function scanPlate() {
+  if(!selectedFile) return;
+  showScanning();
+  const fd = new FormData();
+  fd.append('image', selectedFile);
+  try {
+    const res = await fetch('/api/anpr', {method:'POST', body:fd});
+    const data = await res.json();
+    hideScanning();
+    showResult(data);
+  } catch(e) {
+    hideScanning();
+    alert('Scan failed: ' + e.message);
+  }
+}
+
+async function simulateScan() {
+  showScanning();
+  const manual = document.getElementById('manualPlate')?.value?.trim() || '';
+  const fd = new FormData();
+  if(manual) fd.append('manual_plate', manual);
+  try {
+    const res = await fetch('/api/anpr', {method:'POST', body:fd});
+    const data = await res.json();
+    hideScanning();
+    showResult(data);
+  } catch(e) { hideScanning(); }
+}
+
+async function startCamera() {
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});
+    const video = document.getElementById('cameraFeed');
+    video.srcObject = stream;
+    video.style.display = 'block';
+    document.getElementById('cameraOff').style.display = 'none';
+  } catch(e) {
+    alert('Camera access denied. Use Upload or Simulate mode.');
+  }
+}
+
+async function captureFrame() {
+  const video = document.getElementById('cameraFeed');
+  if(!video.srcObject) { alert('Start camera first'); return; }
+  const canvas = document.createElement('canvas');
+  canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+  canvas.getContext('2d').drawImage(video, 0, 0);
+  canvas.toBlob(async blob => {
+    showScanning();
+    const fd = new FormData(); fd.append('image', blob, 'capture.jpg');
+    try {
+      const res = await fetch('/api/anpr', {method:'POST', body:fd});
+      const data = await res.json();
+      hideScanning(); showResult(data);
+    } catch(e) { hideScanning(); }
+  }, 'image/jpeg', 0.9);
+}
+
+function showScanning() {
+  document.getElementById('scanAnim').style.display = 'block';
+  document.getElementById('resultCard').style.display = 'none';
+}
+function hideScanning() {
+  document.getElementById('scanAnim').style.display = 'none';
+}
+
+function showResult(data) {
+  const card = document.getElementById('resultCard');
+  card.style.display = 'block';
+  document.getElementById('detectedPlate').textContent = data.detected_plate || '—';
+  document.getElementById('suggestedSlot').textContent = data.suggested_slot || 'None';
+  document.getElementById('methodLabel').textContent = data.method === 'ocr' ? 'OCR Detection' : 'AI Simulation';
+  document.getElementById('confidenceBadge').textContent = data.confidence || '—';
+  const proceedBtn = document.getElementById('proceedBtn');
+  if(data.detected_plate) {
+    proceedBtn.href = `/user?vehicle=${encodeURIComponent(data.detected_plate)}`;
+  }
+  // Add to history
+  scanHistory.unshift({plate:data.detected_plate, slot:data.suggested_slot, time:new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'}), method:data.method});
+  renderHistory();
+}
+
+function renderHistory() {
+  const el = document.getElementById('scanHistory');
+  if(!scanHistory.length) { el.innerHTML='<div style="text-align:center;padding:20px;color:#64748b;font-size:.85rem">No scans yet</div>'; return; }
+  el.innerHTML = scanHistory.slice(0,5).map(s => `
+    <div class="history-item">
+      <div style="font-size:1.2rem">${s.method==='ocr'?'📷':'🎲'}</div>
+      <div style="flex:1"><div class="history-plate">${s.plate}</div><div style="font-size:.72rem;color:#64748b;margin-top:2px">${s.time} · Slot ${s.slot}</div></div>
+      <a href="/user?vehicle=${encodeURIComponent(s.plate)}" style="font-size:.72rem;color:#60a5fa;text-decoration:none;padding:4px 10px;border:1px solid rgba(59,130,246,.25);border-radius:6px;">Park</a>
+    </div>`).join('');
+}
+</script>
+</body>
+</html>

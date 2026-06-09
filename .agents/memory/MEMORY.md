@@ -1,0 +1,1 @@
+- [Smart Parking Stack](smart-parking-stack.md) — Flask+SQLite+AI platform, 200 slots, zones A-D (A1-A50 etc.), billing engine, ANPR, demo mode.

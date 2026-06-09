@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Demo Mode — Smart Parking AI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/style.css">
+<style>
+body::before { content:''; position:fixed; inset:0; background:radial-gradient(ellipse 70% 50% at 20% 20%,rgba(245,158,11,.08) 0%,transparent 60%),radial-gradient(ellipse 50% 50% at 80% 80%,rgba(37,99,235,.07) 0%,transparent 60%); pointer-events:none; z-index:0; }
+.sim-card { background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.07); border-radius:18px; padding:24px; margin-bottom:16px; }
+.sim-btn { padding:13px 24px; border:none; border-radius:10px; font-size:.9rem; font-weight:700; font-family:Inter,sans-serif; cursor:pointer; transition:.2s; }
+.sim-btn-primary { background:linear-gradient(135deg,#f59e0b,#d97706); color:white; }
+.sim-btn-primary:hover { transform:translateY(-2px); box-shadow:0 8px 24px rgba(245,158,11,.4); }
+.sim-btn-danger { background:rgba(239,68,68,.15); border:1px solid rgba(239,68,68,.3); color:#f87171; }
+.sim-btn-danger:hover { background:rgba(239,68,68,.25); }
+.sim-btn:disabled { opacity:.5; cursor:not-allowed; transform:none!important; }
+.log-area { background:rgba(0,0,0,.4); border:1px solid rgba(255,255,255,.07); border-radius:12px; padding:16px; font-family:'Courier New',monospace; font-size:.8rem; color:#6ee7b7; max-height:260px; overflow-y:auto; min-height:80px; }
+.log-line { margin-bottom:4px; }
+.log-line.err { color:#f87171; }
+.log-line.info { color:#93c5fd; }
+.slider-wrap { display:flex; align-items:center; gap:14px; }
+input[type=range] { flex:1; -webkit-appearance:none; height:5px; border-radius:3px; background:rgba(255,255,255,.1); outline:none; }
+input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:18px; height:18px; border-radius:50%; background:linear-gradient(135deg,#f59e0b,#d97706); cursor:pointer; border:2px solid rgba(255,255,255,.2); }
+.feature-badge { display:inline-flex; align-items:center; gap:6px; padding:5px 12px; border-radius:100px; font-size:.75rem; font-weight:700; background:rgba(245,158,11,.1); border:1px solid rgba(245,158,11,.25); color:#fcd34d; margin:4px; }
+</style>
+</head>
+<body>
+<div class="dashboard">
+  <div class="sidebar">
+    <div class="sidebar-logo"><div class="logo-icon">🚗</div><div><h2>Smart Parking</h2><small>AI Platform</small></div></div>
+    <div class="nav-label">Overview</div>
+    <a href="/dashboard"><span class="nav-icon">🏠</span> Dashboard</a>
+    <div class="nav-label">Management</div>
+    <a href="/history"><span class="nav-icon">📜</span> History</a>
+    <a href="/map"><span class="nav-icon">🗺️</span> Live Map</a>
+    <a href="/report"><span class="nav-icon">📈</span> Reports</a>
+    <div class="nav-label">Tools</div>
+    <a href="/anpr"><span class="nav-icon">📷</span> ANPR Scanner</a>
+    <a href="/demo" class="active"><span class="nav-icon">🎮</span> Demo Mode</a>
+    <a href="/admin/settings"><span class="nav-icon">⚙️</span> Settings</a>
+    <div class="nav-label">User Portal</div>
+    <a href="/user"><span class="nav-icon">👤</span> Park Vehicle</a>
+    <a href="/exit"><span class="nav-icon">🚪</span> Vehicle Exit</a>
+    <div style="margin-top:auto;padding-top:20px;border-top:1px solid rgba(255,255,255,.06);">
+      <a href="/logout" style="display:flex;align-items:center;gap:10px;color:#f87171;text-decoration:none;padding:12px 16px;border-radius:12px;font-size:.9rem;font-weight:500;border:1px solid rgba(239,68,68,.15);background:rgba(239,68,68,.05);">⏻ Logout</a>
+    </div>
+  </div>
+
+  <div class="main" style="position:relative;z-index:1;overflow-y:auto;">
+    <div class="page-header">
+      <h1>🎮 Demo Mode</h1>
+      <p style="color:#94a3b8;margin-top:5px">Simulate parking traffic for demonstrations, exhibitions & testing</p>
+    </div>
+
+    <div style="background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.2);border-radius:16px;padding:18px 22px;margin-bottom:24px;display:flex;align-items:flex-start;gap:14px;">
+      <span style="font-size:1.5rem;flex-shrink:0;">⚠️</span>
+      <div>
+        <div style="font-weight:700;color:#fcd34d;margin-bottom:4px">Demo Mode — For Exhibitions & Presentations</div>
+        <div style="font-size:.85rem;color:#94a3b8">This will generate random vehicle entries in the database to demonstrate system capabilities. All AI features (slot allocation, predictions, billing) work on simulated data. Use "Clear All Data" to reset after the demo.</div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start;">
+      <div>
+        <!-- Simulation Control -->
+        <div class="sim-card">
+          <h3 style="font-weight:800;margin-bottom:16px;font-size:1.05rem">🎲 Traffic Simulator</h3>
+          <div style="margin-bottom:18px;">
+            <label style="display:block;font-size:.78rem;font-weight:700;color:#94a3b8;letter-spacing:.04em;text-transform:uppercase;margin-bottom:10px">Number of Vehicles: <span id="countLabel">10</span></label>
+            <div class="slider-wrap">
+              <span style="font-size:.8rem;color:#64748b">1</span>
+              <input type="range" id="vehicleCount" min="1" max="30" value="10" oninput="document.getElementById('countLabel').textContent=this.value">
+              <span style="font-size:.8rem;color:#64748b">30</span>
+            </div>
+          </div>
+          <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:14px;margin-bottom:16px;">
+            <div style="font-size:.78rem;color:#64748b;margin-bottom:8px;font-weight:600;letter-spacing:.03em;text-transform:uppercase">What gets simulated:</div>
+            <div>
+              <span class="feature-badge">🚗 Random vehicles</span>
+              <span class="feature-badge">⏱ Entry/exit times</span>
+              <span class="feature-badge">💰 Billing calculation</span>
+              <span class="feature-badge">🤖 AI slot allocation</span>
+              <span class="feature-badge">📊 Zone distribution</span>
+            </div>
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <button class="sim-btn sim-btn-primary" onclick="runSimulation()" id="simBtn">🚀 Run Simulation</button>
+            <button class="sim-btn sim-btn-danger" onclick="clearData()" id="clearBtn">🗑 Clear All Data</button>
+          </div>
+        </div>
+
+        <!-- Live Status -->
+        <div class="sim-card">
+          <h3 style="font-weight:800;margin-bottom:16px;font-size:1.05rem">📊 Current State</h3>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;" id="liveStats">
+            <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:14px;text-align:center;"><div style="font-size:1.5rem;font-weight:900;color:#6ee7b7" id="s-avail">—</div><div style="font-size:.75rem;color:#64748b">Available</div></div>
+            <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:14px;text-align:center;"><div style="font-size:1.5rem;font-weight:900;color:#fca5a5" id="s-occ">—</div><div style="font-size:.75rem;color:#64748b">Occupied</div></div>
+            <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:14px;text-align:center;"><div style="font-size:1.5rem;font-weight:900;color:#fcd34d" id="s-entries">—</div><div style="font-size:.75rem;color:#64748b">Today's Entries</div></div>
+            <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:14px;text-align:center;"><div style="font-size:1.5rem;font-weight:900;color:#34d399" id="s-revenue">—</div><div style="font-size:.75rem;color:#64748b">Revenue Today</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Log Output -->
+      <div>
+        <div class="sim-card" style="height:100%">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+            <h3 style="font-weight:800;font-size:1.05rem">📟 Simulation Log</h3>
+            <button onclick="document.getElementById('logArea').innerHTML=''" style="background:transparent;border:1px solid rgba(255,255,255,.1);border-radius:8px;color:#64748b;padding:5px 12px;font-size:.75rem;cursor:pointer;font-family:Inter,sans-serif;">Clear Log</button>
+          </div>
+          <div class="log-area" id="logArea">
+            <div class="log-line info">[System] Demo mode ready. Configure and run simulation above.</div>
+          </div>
+          <div style="margin-top:16px;display:flex;flex-direction:column;gap:8px;">
+            <a href="/dashboard" style="display:flex;align-items:center;justify-content:center;gap:8px;padding:11px 16px;background:rgba(37,99,235,.1);border:1px solid rgba(59,130,246,.25);border-radius:10px;color:#93c5fd;text-decoration:none;font-size:.88rem;font-weight:600;">📊 View Dashboard</a>
+            <a href="/map" style="display:flex;align-items:center;justify-content:center;gap:8px;padding:11px 16px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;color:#94a3b8;text-decoration:none;font-size:.88rem;font-weight:600;">🗺️ View Live Map</a>
+            <a href="/report" style="display:flex;align-items:center;justify-content:center;gap:8px;padding:11px 16px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;color:#94a3b8;text-decoration:none;font-size:.88rem;font-weight:600;">📈 View Reports</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function log(msg, type='') {
+  const el = document.getElementById('logArea');
+  const div = document.createElement('div');
+  div.className = 'log-line' + (type?' '+type:'');
+  const time = new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  div.textContent = `[${time}] ${msg}`;
+  el.appendChild(div);
+  el.scrollTop = el.scrollHeight;
+}
+
+async function runSimulation() {
+  const count = parseInt(document.getElementById('vehicleCount').value);
+  document.getElementById('simBtn').disabled = true;
+  log(`Starting simulation — ${count} vehicles...`, 'info');
+  try {
+    const res = await fetch('/api/simulate', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({count})});
+    const data = await res.json();
+    log(`✅ ${data.created} vehicles created (${data.skipped} skipped/duplicates)`);
+    log('AI slot allocation applied to all entries');
+    log('Billing calculated for completed sessions');
+    await updateStats();
+  } catch(e) {
+    log('❌ Simulation failed: ' + e.message, 'err');
+  }
+  document.getElementById('simBtn').disabled = false;
+}
+
+async function clearData() {
+  if(!confirm('Delete ALL parking records? This cannot be undone.')) return;
+  document.getElementById('clearBtn').disabled = true;
+  log('Clearing all parking records...', 'info');
+  try {
+    const res = await fetch('/api/clear-demo', {method:'POST'});
+    const data = await res.json();
+    log('✅ ' + data.message);
+    await updateStats();
+  } catch(e) {
+    log('❌ Clear failed: ' + e.message, 'err');
+  }
+  document.getElementById('clearBtn').disabled = false;
+}
+
+async function updateStats() {
+  try {
+    const res = await fetch('/api/insights');
+    const data = await res.json();
+    document.getElementById('s-avail').textContent = data.available;
+    document.getElementById('s-occ').textContent = data.live_count;
+    document.getElementById('s-entries').textContent = data.today.today_entries;
+    document.getElementById('s-revenue').textContent = '₹' + Math.round(data.revenue?.today || 0);
+  } catch(e) {}
+}
+
+updateStats();
+setInterval(updateStats, 15000);
+</script>
+</body>
+</html>
