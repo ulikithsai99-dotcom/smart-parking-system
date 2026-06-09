@@ -1,0 +1,217 @@
+Perform a focused quality and security upgrade of the existing Smart Parking System.
+
+Do not rewrite the project.
+
+Preserve all existing functionality.
+
+Fix the following issues carefully and professionally.
+
+====================================================
+ISSUE 1 - FAKE NUMBER PLATE ATTACK
+==================================
+
+Current problem:
+
+Any handwritten or printed number plate shown to the camera gets accepted and a parking slot is assigned.
+
+This is unacceptable.
+
+Implement a secure multi-stage verification pipeline.
+
+Pipeline:
+
+Camera
+↓
+Vehicle Detection
+↓
+Number Plate Detection
+↓
+OCR
+↓
+Validation
+↓
+Slot Assignment
+
+====================================================
+VEHICLE DETECTION
+=================
+
+Before OCR, verify that an actual vehicle exists.
+
+Use:
+
+YOLOv8 or MobileNet SSD
+
+Detect:
+
+* Car
+* SUV
+* Truck
+* Motorcycle
+
+Do not proceed if no vehicle is detected.
+
+Display:
+
+"No vehicle detected."
+
+====================================================
+NUMBER PLATE DETECTION
+======================
+
+Detect plate region separately.
+
+Reject:
+
+* Paper sheets
+* Mobile phone images
+* Screenshots
+* Printed text
+
+Assign slot only when:
+
+Vehicle + Number Plate are both detected.
+
+====================================================
+PLATE FORMAT VALIDATION
+=======================
+
+Validate Indian number plate patterns.
+
+Examples:
+
+KA01AB1234
+MH12CD5678
+
+Reject invalid formats.
+
+Display:
+
+"Invalid number plate format."
+
+====================================================
+DUPLICATE ENTRY PROTECTION
+==========================
+
+Prevent the same vehicle from receiving multiple slots.
+
+If vehicle already exists inside parking:
+
+Show:
+
+"Vehicle already parked."
+
+Highlight current slot.
+
+====================================================
+CONFIDENCE SCORE
+================
+
+OCR confidence must exceed 90%.
+
+Reject low-confidence readings.
+
+Display:
+
+"Please reposition vehicle."
+
+====================================================
+OPTIONAL HUMAN CONFIRMATION
+===========================
+
+Show detected number.
+
+Ask:
+
+"Confirm Vehicle Number?"
+
+[Confirm]
+[Rescan]
+
+Assign slot only after confirmation.
+
+====================================================
+SCROLLING BUG FIXES
+===================
+
+Audit the entire frontend.
+
+Fix:
+
+* Broken scrolling
+* Double scrollbars
+* Overflow issues
+* Hidden content
+* Cards exceeding screen width
+* Mobile responsiveness problems
+* Horizontal scrolling
+* Layout shifting
+
+Requirements:
+
+Body must have only one scrollbar.
+
+Prevent:
+
+overflow-x
+
+Ensure:
+
+overflow-x: hidden
+
+Use:
+
+max-width
+flex-wrap
+responsive containers
+
+Fix all pages:
+
+Dashboard
+Zones
+Analytics
+Admin Panel
+Camera Mode
+Reports
+
+====================================================
+UI QUALITY IMPROVEMENTS
+=======================
+
+Ensure:
+
+Smooth scrolling
+Sticky sidebar
+Responsive tables
+Consistent spacing
+Proper margins
+Professional card layouts
+Uniform typography
+
+====================================================
+QUALITY ASSURANCE
+=================
+
+Audit every component.
+
+Identify:
+
+Unused CSS
+Duplicate code
+Broken responsiveness
+Overflow bugs
+Performance issues
+
+Refactor without breaking existing features.
+
+====================================================
+FINAL REQUIREMENT
+=================
+
+Do not generate placeholder code.
+
+Implement the fixes directly.
+
+Preserve existing architecture.
+
+The system should feel like a production-grade smart parking platform rather than a college prototype.

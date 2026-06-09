@@ -6,46 +6,143 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/css/style.css">
+
+<!-- TensorFlow.js for vehicle detection (COCO-SSD) -->
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.14.0/dist/tf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.3/dist/coco-ssd.min.js"></script>
+<!-- Tesseract.js for OCR -->
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+
 <style>
-body::before { content:''; position:fixed; inset:0; background:radial-gradient(ellipse 70% 50% at 20% 20%,rgba(37,99,235,.1) 0%,transparent 60%),radial-gradient(ellipse 50% 50% at 80% 80%,rgba(6,182,212,.07) 0%,transparent 60%); pointer-events:none; z-index:0; }
+body::before { content:''; position:fixed; inset:0; background:radial-gradient(ellipse 70% 50% at 20% 20%,rgba(37,99,235,.09) 0%,transparent 60%); pointer-events:none; z-index:0; }
 
-.anpr-zone { border:2px dashed rgba(59,130,246,.3); border-radius:20px; padding:32px; text-align:center; background:rgba(37,99,235,.04); transition:.3s; cursor:pointer; }
-.anpr-zone:hover, .anpr-zone.drag-over { border-color:rgba(59,130,246,.7); background:rgba(37,99,235,.08); }
-.anpr-zone.has-image { border-color:rgba(16,185,129,.5); background:rgba(16,185,129,.05); }
-
-.cam-preview { width:100%; max-height:280px; border-radius:14px; object-fit:contain; display:none; margin-bottom:14px; border:1px solid rgba(255,255,255,.1); }
-#preview-img { width:100%; max-height:220px; border-radius:12px; object-fit:contain; display:none; margin-top:14px; }
-
-.result-card { background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.1); border-radius:18px; padding:24px; margin-top:20px; display:none; }
-.plate-display { font-size:2.2rem; font-weight:900; letter-spacing:.12em; color:#f0f4ff; background:rgba(6,12,24,.8); border:2px solid rgba(59,130,246,.4); border-radius:12px; padding:14px 28px; display:inline-block; margin:12px auto; font-family:'Courier New',monospace; }
-.slot-recommend { background:linear-gradient(135deg,rgba(37,99,235,.12),rgba(6,182,212,.08)); border:1px solid rgba(59,130,246,.25); border-radius:14px; padding:16px 22px; margin-top:14px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; }
-
-.tab-btn { padding:9px 20px; border-radius:8px; border:1px solid rgba(255,255,255,.1); background:transparent; color:#94a3b8; font-size:.85rem; font-weight:600; cursor:pointer; transition:.2s; font-family:Inter,sans-serif; }
+/* ── Tab Buttons ── */
+.tab-btn { padding:9px 20px; border-radius:8px; border:1px solid rgba(255,255,255,.1); background:transparent; color:#94a3b8; font-size:.85rem; font-weight:600; cursor:pointer; transition:.2s; font-family:Inter,sans-serif; width:auto; }
 .tab-btn.active { background:rgba(37,99,235,.15); border-color:rgba(59,130,246,.35); color:#93c5fd; }
-.tab-btn:hover:not(.active) { background:rgba(255,255,255,.06); color:#f0f4ff; }
+.tab-btn:hover:not(.active) { background:rgba(255,255,255,.06); color:#f0f4ff; transform:none; box-shadow:none; }
 
-.scan-btn { width:100%; padding:14px; border:none; border-radius:12px; background:linear-gradient(135deg,#2563eb,#06b6d4); color:white; font-size:1rem; font-weight:700; font-family:Inter,sans-serif; cursor:pointer; transition:.2s; margin-top:14px; }
-.scan-btn:hover { transform:translateY(-2px); box-shadow:0 8px 28px rgba(37,99,235,.45); }
-.scan-btn:disabled { opacity:.5; cursor:not-allowed; transform:none; }
+/* ── Drop Zone ── */
+.drop-zone {
+  border:2px dashed rgba(59,130,246,.3); border-radius:18px; padding:36px 24px;
+  text-align:center; background:rgba(37,99,235,.04); transition:.3s; cursor:pointer;
+  position:relative;
+}
+.drop-zone:hover,.drop-zone.drag-over { border-color:rgba(59,130,246,.7); background:rgba(37,99,235,.08); }
+.drop-zone.has-image { border-color:rgba(16,185,129,.5); background:rgba(16,185,129,.04); }
+#previewImg { width:100%; max-height:200px; border-radius:12px; object-fit:contain; display:none; margin-top:14px; border:1px solid rgba(255,255,255,.1); }
 
-.scan-anim { display:none; text-align:center; padding:20px; }
-.scan-bar { width:80%; height:3px; background:rgba(255,255,255,.06); border-radius:2px; margin:10px auto; overflow:hidden; }
-.scan-progress { height:100%; background:linear-gradient(90deg,#2563eb,#06b6d4); border-radius:2px; animation:scan 1.5s ease-in-out infinite; }
-@keyframes scan { 0%{width:0%;margin-left:0%} 50%{width:60%;margin-left:20%} 100%{width:0%;margin-left:100%} }
+/* ── Scan button ── */
+.scan-btn {
+  width:100%; padding:14px 20px; border:none; border-radius:12px;
+  background:linear-gradient(135deg,#2563eb,#06b6d4); color:white;
+  font-size:.95rem; font-weight:700; font-family:Inter,sans-serif;
+  cursor:pointer; transition:.2s; margin-top:12px;
+  display:flex; align-items:center; justify-content:center; gap:8px;
+}
+.scan-btn:hover:not(:disabled) { transform:translateY(-2px); box-shadow:0 8px 28px rgba(37,99,235,.45); }
+.scan-btn:disabled { opacity:.45; cursor:not-allowed; transform:none; box-shadow:none; }
 
-.history-item { display:flex; align-items:center; gap:14px; padding:14px; background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.06); border-radius:12px; margin-bottom:8px; }
-.history-plate { font-weight:900; font-size:1rem; letter-spacing:.08em; color:#f0f4ff; font-family:'Courier New',monospace; }
+/* ── Pipeline Steps ── */
+.pipeline { display:flex; flex-direction:column; gap:10px; margin:16px 0; }
+.pipeline-step {
+  display:flex; align-items:center; gap:12px;
+  padding:12px 16px; border-radius:12px;
+  background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.06);
+  transition:.3s;
+}
+.pipeline-step.active  { background:rgba(37,99,235,.08); border-color:rgba(59,130,246,.25); }
+.pipeline-step.success { background:rgba(16,185,129,.07); border-color:rgba(16,185,129,.25); }
+.pipeline-step.failed  { background:rgba(239,68,68,.07); border-color:rgba(239,68,68,.25); }
+.pipeline-step.waiting { opacity:.4; }
+.step-icon { width:34px; height:34px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:.9rem; flex-shrink:0; }
+.si-idle    { background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.1); }
+.si-active  { background:rgba(37,99,235,.15); border:1px solid rgba(59,130,246,.3); animation:pulse-dot 1.2s infinite; }
+.si-ok      { background:rgba(16,185,129,.15); border:1px solid rgba(16,185,129,.3); }
+.si-fail    { background:rgba(239,68,68,.15); border:1px solid rgba(239,68,68,.3); }
+.step-label { font-size:.82rem; font-weight:600; }
+.step-val   { font-size:.75rem; color:#94a3b8; margin-top:2px; }
+
+/* ── Spinner ── */
+.spin { animation:spin .8s linear infinite; display:inline-block; }
+
+/* ── Plate display ── */
+.plate-display {
+  font-size:1.8rem; font-weight:900; letter-spacing:.12em; color:#f0f4ff;
+  background:rgba(6,12,24,.8); border:2px solid rgba(59,130,246,.4);
+  border-radius:10px; padding:12px 24px; display:inline-block;
+  font-family:'Courier New',monospace;
+}
+
+/* ── Result card ── */
+.result-panel { margin-top:16px; display:none; }
+.slot-badge {
+  display:inline-flex; align-items:center; gap:8px;
+  background:linear-gradient(135deg,rgba(37,99,235,.18),rgba(6,182,212,.12));
+  border:1px solid rgba(59,130,246,.3); padding:8px 20px; border-radius:100px;
+  font-size:1.2rem; font-weight:900; letter-spacing:.06em; color:#93c5fd;
+}
+
+/* ── Confirm Dialog ── */
+.confirm-overlay {
+  position:fixed; inset:0; background:rgba(0,0,0,.7); z-index:1000;
+  display:flex; align-items:center; justify-content:center; padding:20px;
+  backdrop-filter:blur(10px); display:none;
+}
+.confirm-box {
+  background:rgba(8,14,30,.98); border:1px solid rgba(255,255,255,.18);
+  border-radius:24px; padding:40px 36px; max-width:420px; width:100%;
+  text-align:center; position:relative; box-shadow:0 30px 80px rgba(0,0,0,.7);
+}
+.confirm-box::before { content:''; position:absolute; top:0; left:0; right:0; height:1px; background:linear-gradient(90deg,transparent,rgba(59,130,246,.7),transparent); }
+
+/* ── Model loader ── */
+.model-badge {
+  display:inline-flex; align-items:center; gap:7px;
+  padding:6px 14px; border-radius:100px; font-size:.73rem; font-weight:700;
+  letter-spacing:.04em; border:1px solid; transition:.3s;
+}
+.model-loading { background:rgba(245,158,11,.1); border-color:rgba(245,158,11,.3); color:#fcd34d; }
+.model-ready   { background:rgba(16,185,129,.1); border-color:rgba(16,185,129,.3); color:#34d399; }
+.model-error   { background:rgba(239,68,68,.1);  border-color:rgba(239,68,68,.3);  color:#fca5a5; }
+
+/* ── Confidence meter ── */
+.conf-bar { height:5px; border-radius:3px; background:rgba(255,255,255,.07); margin:6px 0; overflow:hidden; }
+.conf-fill { height:100%; border-radius:3px; transition:.6s ease; }
+
+/* ── History ── */
+.history-item {
+  display:flex; align-items:center; gap:12px; padding:12px 14px;
+  background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.06);
+  border-radius:11px; margin-bottom:7px; transition:.2s;
+}
+.history-item:hover { background:rgba(255,255,255,.06); }
+.history-plate { font-weight:900; font-size:.92rem; letter-spacing:.07em; color:#f0f4ff; font-family:'Courier New',monospace; }
+
+/* ── Error / warning banners ── */
+.alert-box {
+  display:flex; align-items:flex-start; gap:12px; padding:14px 18px;
+  border-radius:12px; margin-top:12px; font-size:.85rem; font-weight:600;
+}
+.alert-error  { background:rgba(239,68,68,.08); border:1px solid rgba(239,68,68,.25); color:#fca5a5; }
+.alert-warn   { background:rgba(245,158,11,.08); border:1px solid rgba(245,158,11,.2); color:#fcd34d; }
+.alert-ok     { background:rgba(16,185,129,.08); border:1px solid rgba(16,185,129,.2); color:#6ee7b7; }
+
+@media(max-width:900px){ .anpr-grid{ grid-template-columns:1fr !important; } }
 </style>
 </head>
 <body>
 <div class="dashboard">
+  <!-- ─── Sidebar ─────────────────────────── -->
   <div class="sidebar">
-    <div class="sidebar-logo"><div class="logo-icon">🚗</div><div><h2>Smart Parking</h2><small>AI Platform</small></div></div>
+    <div class="sidebar-logo">
+      <div class="logo-icon">🚗</div>
+      <div><h2>Smart Parking</h2><small>AI Platform</small></div>
+    </div>
     <div class="nav-label">Overview</div>
     <a href="/dashboard"><span class="nav-icon">🏠</span> Dashboard</a>
     <div class="nav-label">Management</div>
     <a href="/history"><span class="nav-icon">📜</span> History</a>
-    <a href="/stats"><span class="nav-icon">📊</span> Statistics</a>
+    <a href="/reservations"><span class="nav-icon">📋</span> Reservations</a>
     <a href="/map"><span class="nav-icon">🗺️</span> Live Map</a>
     <a href="/report"><span class="nav-icon">📈</span> Reports</a>
     <div class="nav-label">Tools</div>
@@ -55,123 +152,182 @@ body::before { content:''; position:fixed; inset:0; background:radial-gradient(e
     <div class="nav-label">User Portal</div>
     <a href="/user"><span class="nav-icon">👤</span> Park Vehicle</a>
     <a href="/exit"><span class="nav-icon">🚪</span> Vehicle Exit</a>
-    <div style="margin-top:auto;padding-top:20px;border-top:1px solid rgba(255,255,255,.06);">
-      <a href="/logout" style="display:flex;align-items:center;gap:10px;color:#f87171;text-decoration:none;padding:12px 16px;border-radius:12px;font-size:.9rem;font-weight:500;border:1px solid rgba(239,68,68,.15);background:rgba(239,68,68,.05);">⏻ Logout</a>
+    <div style="margin-top:auto;padding-top:18px;border-top:1px solid rgba(255,255,255,.06);">
+      <a href="/logout" style="color:#f87171;border:1px solid rgba(239,68,68,.15);background:rgba(239,68,68,.05);">⏻ Logout</a>
     </div>
   </div>
 
-  <div class="main" style="position:relative;z-index:1;overflow-y:auto;">
-    <div class="page-header">
-      <h1>📷 ANPR Scanner</h1>
-      <p style="color:#94a3b8;margin-top:5px">Automatic Number Plate Recognition — Scan & assign slots instantly</p>
+  <!-- ─── Main ──────────────────────────── -->
+  <div class="main">
+    <!-- Header -->
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;margin-bottom:24px;">
+      <div>
+        <h1 style="font-size:1.8rem;font-weight:900;letter-spacing:-.03em;">📷 ANPR Scanner</h1>
+        <p style="color:#94a3b8;margin-top:4px;font-size:.9rem;">Multi-stage AI verification pipeline — Vehicle → Plate → OCR → Confirm</p>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+        <span class="model-badge model-loading" id="modelBadge"><span class="spin">⏳</span> Loading AI Models...</span>
+      </div>
     </div>
 
-    <div style="display:grid;grid-template-columns:1fr 360px;gap:20px;align-items:start;" class="anpr-grid">
-      <!-- Main Scanner Panel -->
+    <!-- ── Grid Layout ── -->
+    <div style="display:grid;grid-template-columns:1fr 340px;gap:20px;align-items:start;" class="anpr-grid">
+
+      <!-- Left: Scanner -->
       <div>
-        <div style="background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.07);border-radius:20px;padding:24px;margin-bottom:20px;">
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;flex-wrap:wrap;">
-            <button class="tab-btn active" onclick="switchTab('upload')">📤 Upload Image</button>
-            <button class="tab-btn" onclick="switchTab('camera')">📸 Live Camera</button>
-            <button class="tab-btn" onclick="switchTab('simulate')">🎲 Simulate</button>
+        <div style="background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.07);border-radius:20px;padding:24px;margin-bottom:18px;">
+
+          <!-- Tabs -->
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:20px;flex-wrap:wrap;">
+            <button class="tab-btn active" onclick="switchTab('upload',this)">📤 Upload Image</button>
+            <button class="tab-btn" onclick="switchTab('camera',this)">📸 Live Camera</button>
+            <button class="tab-btn" onclick="switchTab('manual',this)">⌨️ Manual Entry</button>
           </div>
 
           <!-- Upload Tab -->
           <div id="tab-upload">
-            <div class="anpr-zone" id="dropZone" onclick="document.getElementById('fileInput').click()" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="handleDrop(event)">
-              <div style="font-size:3rem;margin-bottom:12px">📸</div>
-              <div style="font-weight:700;font-size:1rem;margin-bottom:6px">Drop plate image here</div>
-              <div style="font-size:.85rem;color:#64748b">or click to browse — supports JPG, PNG, WebP</div>
+            <div class="drop-zone" id="dropZone"
+              onclick="document.getElementById('fileInput').click()"
+              ondragover="event.preventDefault();this.classList.add('drag-over')"
+              ondragleave="this.classList.remove('drag-over')"
+              ondrop="handleDrop(event)">
+              <div style="font-size:2.8rem;margin-bottom:10px;">📸</div>
+              <div style="font-weight:700;font-size:.95rem;margin-bottom:5px;">Drop vehicle image here</div>
+              <div style="font-size:.8rem;color:#64748b;">JPG · PNG · WebP — or click to browse</div>
               <input type="file" id="fileInput" accept="image/*" style="display:none" onchange="handleFile(this.files[0])">
             </div>
-            <img id="preview-img" alt="Preview">
-            <button class="scan-btn" id="scanBtn" onclick="scanPlate()" disabled>🔍 Detect Plate & Suggest Slot</button>
+            <img id="previewImg" alt="Preview">
+            <button class="scan-btn" id="scanUploadBtn" onclick="runPipeline('upload')" disabled>
+              🔍 Detect Vehicle &amp; Read Plate
+            </button>
           </div>
 
           <!-- Camera Tab -->
-          <div id="tab-camera" style="display:none">
-            <div style="border-radius:16px;overflow:hidden;background:#000;position:relative;margin-bottom:14px;">
-              <video id="cameraFeed" class="cam-preview" style="display:block;" autoplay muted></video>
+          <div id="tab-camera" style="display:none;">
+            <div style="border-radius:16px;overflow:hidden;background:#000;position:relative;margin-bottom:12px;">
+              <video id="cameraFeed" style="width:100%;max-height:240px;object-fit:contain;display:block;" autoplay muted playsinline></video>
               <div id="cameraOff" style="padding:60px;text-align:center;color:#64748b;">
-                <div style="font-size:3rem;margin-bottom:10px;">📷</div>
-                <div style="font-weight:600">Camera not started</div>
+                <div style="font-size:2.5rem;margin-bottom:8px;">📷</div>
+                <div style="font-weight:600;font-size:.9rem;">Camera not started</div>
               </div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+              <button class="scan-btn" style="margin-top:0;" onclick="startCamera()">📷 Start Camera</button>
+              <button class="scan-btn" style="margin-top:0;background:linear-gradient(135deg,#059669,#10b981);" onclick="captureAndScan()">📸 Capture &amp; Scan</button>
+            </div>
+          </div>
+
+          <!-- Manual Entry Tab -->
+          <div id="tab-manual" style="display:none;">
+            <div style="background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.18);border-radius:14px;padding:18px;margin-bottom:14px;">
+              <div style="font-size:.78rem;font-weight:700;color:#fcd34d;letter-spacing:.05em;text-transform:uppercase;margin-bottom:6px;">Manual Plate Entry</div>
+              <div style="font-size:.8rem;color:#94a3b8;">Type the plate number directly. Format validation and duplicate check will still run.</div>
+            </div>
+            <label style="display:block;font-size:.73rem;font-weight:700;color:#94a3b8;letter-spacing:.05em;text-transform:uppercase;margin-bottom:8px;">Vehicle Number</label>
+            <input type="text" id="manualInput" placeholder="e.g. KA01AB1234" style="width:100%;padding:13px 16px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.14);border-radius:11px;color:#f0f4ff;font-size:1rem;outline:none;font-family:'Courier New',monospace;letter-spacing:.08em;text-transform:uppercase;margin-bottom:12px;">
+            <button class="scan-btn" onclick="runPipeline('manual')" style="margin-top:0;">✅ Validate &amp; Suggest Slot</button>
+          </div>
+
+        </div>
+
+        <!-- ── Pipeline Progress ── -->
+        <div style="background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.07);border-radius:20px;padding:20px;margin-bottom:18px;" id="pipelinePanel">
+          <div style="font-size:.73rem;font-weight:700;color:#64748b;letter-spacing:.06em;text-transform:uppercase;margin-bottom:14px;">Verification Pipeline</div>
+          <div class="pipeline">
+            <div class="pipeline-step waiting" id="ps-vehicle">
+              <div class="step-icon si-idle" id="ps-vehicle-icon">🚗</div>
+              <div><div class="step-label">Vehicle Detection</div><div class="step-val" id="ps-vehicle-val">Awaiting image…</div></div>
+            </div>
+            <div class="pipeline-step waiting" id="ps-plate">
+              <div class="step-icon si-idle" id="ps-plate-icon">🔲</div>
+              <div><div class="step-label">Plate Region</div><div class="step-val" id="ps-plate-val">Pending vehicle detection</div></div>
+            </div>
+            <div class="pipeline-step waiting" id="ps-ocr">
+              <div class="step-icon si-idle" id="ps-ocr-icon">🔤</div>
+              <div><div class="step-label">OCR Extraction</div><div class="step-val" id="ps-ocr-val">Pending plate region</div></div>
+            </div>
+            <div class="pipeline-step waiting" id="ps-format">
+              <div class="step-icon si-idle" id="ps-format-icon">📋</div>
+              <div><div class="step-label">Format Validation</div><div class="step-val" id="ps-format-val">Pending OCR</div></div>
+            </div>
+            <div class="pipeline-step waiting" id="ps-duplicate">
+              <div class="step-icon si-idle" id="ps-duplicate-icon">🔍</div>
+              <div><div class="step-label">Duplicate Check</div><div class="step-val" id="ps-duplicate-val">Pending validation</div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── Alert Box ── -->
+        <div id="alertBox" style="display:none;"></div>
+
+        <!-- ── Final Result ── -->
+        <div class="result-panel" id="resultPanel">
+          <div style="background:rgba(255,255,255,.025);border:1px solid rgba(16,185,129,.2);border-radius:20px;padding:24px;">
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px;">
+              <div style="width:42px;height:42px;border-radius:12px;background:rgba(16,185,129,.15);border:1px solid rgba(16,185,129,.3);display:flex;align-items:center;justify-content:center;font-size:1.3rem;">✅</div>
+              <div>
+                <div style="font-weight:800;font-size:1rem;">Plate Verified</div>
+                <div style="font-size:.75rem;color:#64748b;" id="r-method">—</div>
+              </div>
+              <span id="r-conf-badge" style="margin-left:auto;font-size:.73rem;font-weight:700;padding:4px 12px;border-radius:100px;background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.25);color:#34d399;"></span>
+            </div>
+            <div style="text-align:center;margin-bottom:18px;">
+              <div style="font-size:.7rem;color:#64748b;letter-spacing:.05em;text-transform:uppercase;margin-bottom:8px;">Verified Plate Number</div>
+              <div class="plate-display" id="r-plate">—</div>
+            </div>
+            <div style="background:linear-gradient(135deg,rgba(37,99,235,.1),rgba(6,182,212,.06));border:1px solid rgba(59,130,246,.2);border-radius:14px;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:14px;">
+              <div>
+                <div style="font-size:.7rem;color:#64748b;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;">🤖 AI Recommended Slot</div>
+                <div class="slot-badge" id="r-slot">—</div>
+              </div>
+              <a id="r-park-btn" href="/user" style="padding:10px 20px;background:linear-gradient(135deg,#2563eb,#06b6d4);border-radius:10px;color:white;text-decoration:none;font-weight:700;font-size:.85rem;">Park Now →</a>
             </div>
             <div style="display:flex;gap:10px;">
-              <button class="scan-btn" style="flex:1" onclick="startCamera()">📷 Start Camera</button>
-              <button class="scan-btn" style="flex:1;background:linear-gradient(135deg,#059669,#10b981)" onclick="captureFrame()">📸 Capture & Scan</button>
-            </div>
-          </div>
-
-          <!-- Simulate Tab -->
-          <div id="tab-simulate" style="display:none">
-            <div style="background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.2);border-radius:14px;padding:20px;text-align:center;margin-bottom:16px;">
-              <div style="font-size:2.5rem;margin-bottom:8px">🎲</div>
-              <div style="font-weight:700;font-size:.95rem;margin-bottom:6px">Simulation Mode</div>
-              <div style="font-size:.82rem;color:#94a3b8">Generates a realistic Indian vehicle plate number and suggests the optimal slot using the AI engine. Perfect for demos & exhibitions.</div>
-            </div>
-            <div style="margin-bottom:14px;">
-              <label style="display:block;font-size:.78rem;font-weight:700;color:#94a3b8;letter-spacing:.04em;text-transform:uppercase;margin-bottom:8px">Manual Plate Override (optional)</label>
-              <input type="text" id="manualPlate" placeholder="e.g. KA01AB1234 — leave blank to auto-generate" style="width:100%;padding:12px 16px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.14);border-radius:10px;color:#f0f4ff;font-size:.9rem;outline:none;font-family:Inter,sans-serif;">
-            </div>
-            <button class="scan-btn" onclick="simulateScan()">🤖 Run AI Simulation</button>
-          </div>
-
-          <!-- Scan Animation -->
-          <div class="scan-anim" id="scanAnim">
-            <div style="font-size:2rem;margin-bottom:8px">🔍</div>
-            <div style="font-weight:700;margin-bottom:4px">Analyzing plate...</div>
-            <div class="scan-bar"><div class="scan-progress"></div></div>
-          </div>
-
-          <!-- Result -->
-          <div class="result-card" id="resultCard">
-            <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
-              <div style="width:40px;height:40px;border-radius:12px;background:rgba(16,185,129,.15);border:1px solid rgba(16,185,129,.3);display:flex;align-items:center;justify-content:center;font-size:1.3rem;">✅</div>
-              <div><div style="font-weight:800;font-size:.95rem">Plate Detected</div><div style="font-size:.76rem;color:#64748b" id="methodLabel">—</div></div>
-              <span id="confidenceBadge" style="margin-left:auto;font-size:.75rem;font-weight:700;padding:4px 12px;border-radius:100px;background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.25);color:#34d399;">85%</span>
-            </div>
-            <div style="text-align:center;margin-bottom:16px;">
-              <div style="font-size:.72rem;color:#64748b;letter-spacing:.05em;text-transform:uppercase;margin-bottom:8px;">Detected Plate Number</div>
-              <div class="plate-display" id="detectedPlate">—</div>
-            </div>
-            <div class="slot-recommend">
-              <div>
-                <div style="font-size:.72rem;color:#64748b;letter-spacing:.04em;text-transform:uppercase;margin-bottom:4px;">🤖 AI Recommended Slot</div>
-                <div style="font-size:1.5rem;font-weight:900;color:#60a5fa;" id="suggestedSlot">—</div>
-              </div>
-              <a id="proceedBtn" href="/user" style="padding:10px 20px;background:linear-gradient(135deg,#2563eb,#06b6d4);border-radius:10px;color:white;text-decoration:none;font-weight:700;font-size:.85rem;">Park This Vehicle →</a>
+              <button onclick="resetPipeline()" style="flex:1;padding:10px;border:1px solid rgba(255,255,255,.1);border-radius:10px;color:#94a3b8;background:transparent;font-size:.83rem;font-weight:600;font-family:Inter,sans-serif;">↩ Scan Another</button>
+              <button onclick="showConfirm()" style="flex:1;padding:10px;background:linear-gradient(135deg,#059669,#10b981);border-radius:10px;color:white;border:none;font-size:.83rem;font-weight:700;font-family:Inter,sans-serif;" id="confirmAgainBtn">🔁 Confirm Entry</button>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Right sidebar -->
+      <!-- ── Right Panel ── -->
       <div>
-        <!-- Info Panel -->
-        <div style="background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.07);border-radius:18px;padding:20px;margin-bottom:16px;">
-          <h3 style="font-size:.8rem;font-weight:700;color:#64748b;letter-spacing:.06em;text-transform:uppercase;margin-bottom:16px">How It Works</h3>
-          <div style="display:flex;flex-direction:column;gap:12px;">
-            <div style="display:flex;align-items:flex-start;gap:12px;">
-              <div style="width:32px;height:32px;border-radius:8px;background:rgba(37,99,235,.15);border:1px solid rgba(59,130,246,.3);display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0;">1</div>
-              <div><div style="font-weight:600;font-size:.85rem">Upload or Capture</div><div style="font-size:.75rem;color:#64748b;margin-top:2px">Photo of vehicle plate from any angle</div></div>
+        <!-- How it works -->
+        <div style="background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.07);border-radius:18px;padding:18px;margin-bottom:14px;">
+          <div style="font-size:.73rem;font-weight:700;color:#64748b;letter-spacing:.06em;text-transform:uppercase;margin-bottom:14px;">Security Pipeline</div>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <div style="display:flex;align-items:flex-start;gap:10px;">
+              <div style="width:28px;height:28px;border-radius:7px;background:rgba(37,99,235,.15);border:1px solid rgba(59,130,246,.3);display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:800;color:#93c5fd;flex-shrink:0;">1</div>
+              <div><div style="font-weight:600;font-size:.83rem;">Vehicle Detection</div><div style="font-size:.73rem;color:#64748b;margin-top:2px;">COCO-SSD detects car, truck, motorcycle or bus. Rejects no-vehicle images.</div></div>
             </div>
-            <div style="display:flex;align-items:flex-start;gap:12px;">
-              <div style="width:32px;height:32px;border-radius:8px;background:rgba(6,182,212,.12);border:1px solid rgba(6,182,212,.3);display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0;">2</div>
-              <div><div style="font-weight:600;font-size:.85rem">OCR Extraction</div><div style="font-size:.75rem;color:#64748b;margin-top:2px">AI reads the plate number from image</div></div>
+            <div style="display:flex;align-items:flex-start;gap:10px;">
+              <div style="width:28px;height:28px;border-radius:7px;background:rgba(6,182,212,.12);border:1px solid rgba(6,182,212,.3);display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:800;color:#67e8f9;flex-shrink:0;">2</div>
+              <div><div style="font-weight:600;font-size:.83rem;">Plate Region</div><div style="font-size:.73rem;color:#64748b;margin-top:2px;">Extracts lower portion of vehicle where plate typically appears.</div></div>
             </div>
-            <div style="display:flex;align-items:flex-start;gap:12px;">
-              <div style="width:32px;height:32px;border-radius:8px;background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.3);display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0;">3</div>
-              <div><div style="font-weight:600;font-size:.85rem">Slot Assignment</div><div style="font-size:.75rem;color:#64748b;margin-top:2px">AI engine assigns optimal slot based on demand</div></div>
+            <div style="display:flex;align-items:flex-start;gap:10px;">
+              <div style="width:28px;height:28px;border-radius:7px;background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.3);display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:800;color:#6ee7b7;flex-shrink:0;">3</div>
+              <div><div style="font-weight:600;font-size:.83rem;">Tesseract OCR</div><div style="font-size:.73rem;color:#64748b;margin-top:2px;">Reads plate text. Requires ≥85% character confidence to proceed.</div></div>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:10px;">
+              <div style="width:28px;height:28px;border-radius:7px;background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.3);display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:800;color:#fcd34d;flex-shrink:0;">4</div>
+              <div><div style="font-weight:600;font-size:.83rem;">Format Check</div><div style="font-size:.73rem;color:#64748b;margin-top:2px;">Validates Indian plate pattern. Rejects random text, screenshots.</div></div>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:10px;">
+              <div style="width:28px;height:28px;border-radius:7px;background:rgba(124,58,237,.12);border:1px solid rgba(139,92,246,.3);display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:800;color:#c4b5fd;flex-shrink:0;">5</div>
+              <div><div style="font-weight:600;font-size:.83rem;">Duplicate Check</div><div style="font-size:.73rem;color:#64748b;margin-top:2px;">Blocks re-entry if vehicle is already inside. Shows current slot.</div></div>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:10px;">
+              <div style="width:28px;height:28px;border-radius:7px;background:rgba(236,72,153,.1);border:1px solid rgba(236,72,153,.3);display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:800;color:#f9a8d4;flex-shrink:0;">6</div>
+              <div><div style="font-weight:600;font-size:.83rem;">Human Confirm</div><div style="font-size:.73rem;color:#64748b;margin-top:2px;">Operator confirms detected plate before slot is assigned.</div></div>
             </div>
           </div>
         </div>
 
         <!-- Recent Scans -->
-        <div style="background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.07);border-radius:18px;padding:20px;">
-          <h3 style="font-size:.8rem;font-weight:700;color:#64748b;letter-spacing:.06em;text-transform:uppercase;margin-bottom:14px">Recent Scans</h3>
+        <div style="background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.07);border-radius:18px;padding:18px;">
+          <div style="font-size:.73rem;font-weight:700;color:#64748b;letter-spacing:.06em;text-transform:uppercase;margin-bottom:14px;">Recent Scans</div>
           <div id="scanHistory">
-            <div style="text-align:center;padding:20px;color:#64748b;font-size:.85rem">No scans yet</div>
+            <div style="text-align:center;padding:20px;color:#64748b;font-size:.82rem;">No scans yet this session</div>
           </div>
         </div>
       </div>
@@ -179,37 +335,90 @@ body::before { content:''; position:fixed; inset:0; background:radial-gradient(e
   </div>
 </div>
 
-<style>
-@media(max-width:768px){.anpr-grid{grid-template-columns:1fr!important;}}
-</style>
+<!-- ─── Human Confirmation Dialog ─── -->
+<div class="confirm-overlay" id="confirmOverlay">
+  <div class="confirm-box">
+    <div style="width:60px;height:60px;border-radius:18px;background:rgba(37,99,235,.18);border:1px solid rgba(59,130,246,.3);display:flex;align-items:center;justify-content:center;font-size:1.8rem;margin:0 auto 20px;">🔍</div>
+    <h2 style="font-size:1.3rem;font-weight:900;letter-spacing:-.02em;margin-bottom:6px;">Confirm Vehicle Number</h2>
+    <p style="color:#94a3b8;font-size:.88rem;margin-bottom:20px;">Please verify the detected plate before assigning a slot.</p>
+    <div class="plate-display" id="confirmPlate" style="margin-bottom:8px;">—</div>
+    <div style="font-size:.75rem;color:#64748b;margin-bottom:24px;" id="confirmConf"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <button onclick="rejectConfirm()" style="padding:13px;border:1px solid rgba(255,255,255,.12);border-radius:12px;color:#94a3b8;background:transparent;font-size:.9rem;font-weight:700;font-family:Inter,sans-serif;">↩ Rescan</button>
+      <button onclick="acceptConfirm()" style="padding:13px;background:linear-gradient(135deg,#2563eb,#06b6d4);border:none;border-radius:12px;color:white;font-size:.9rem;font-weight:700;font-family:Inter,sans-serif;">✅ Confirm</button>
+    </div>
+  </div>
+</div>
 
 <script>
-let selectedFile = null;
-let scanHistory = [];
-let stream = null;
+// ════════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════════
+const CONFIDENCE_THRESHOLD = 85;
+const VEHICLE_CLASSES = ['car','truck','motorcycle','bus','bicycle','van'];
+const INDIAN_PLATE_RE  = /[A-Z]{2}[0-9]{1,2}[A-Z]{1,3}[0-9]{4}/g;
 
-function switchTab(tab) {
-  ['upload','camera','simulate'].forEach(t => {
-    document.getElementById('tab-'+t).style.display = t===tab?'block':'none';
-  });
-  document.querySelectorAll('.tab-btn').forEach((btn,i) => {
-    btn.classList.toggle('active', ['upload','camera','simulate'][i] === tab);
-  });
-  if(tab !== 'camera' && stream) {
-    stream.getTracks().forEach(t=>t.stop());
-    stream = null;
+let detectorModel  = null;
+let modelsReady    = false;
+let selectedImg    = null;
+let capturedCanvas = null;
+let camStream      = null;
+let pendingResult  = null;
+let scanHistory    = [];
+
+// ════════════════════════════════════════════
+// MODEL LOADING
+// ════════════════════════════════════════════
+async function loadModels() {
+  const badge = document.getElementById('modelBadge');
+  try {
+    badge.className = 'model-badge model-loading';
+    badge.innerHTML = '<span class="spin">⏳</span> Loading AI Models…';
+
+    // Load COCO-SSD (vehicle detection)
+    detectorModel = await cocoSsd.load({ base: 'lite_mobilenet_v2' });
+
+    modelsReady = true;
+    badge.className = 'model-badge model-ready';
+    badge.innerHTML = '✅ AI Models Ready';
+    document.getElementById('scanUploadBtn').disabled = false;
+  } catch(e) {
+    badge.className = 'model-badge model-error';
+    badge.innerHTML = '⚠️ Model Load Failed';
+    console.error('Model load error:', e);
+    // Still allow manual entry
+    modelsReady = false;
   }
+}
+
+loadModels();
+
+// ════════════════════════════════════════════
+// TAB / FILE HANDLING
+// ════════════════════════════════════════════
+function switchTab(tab, btn) {
+  ['upload','camera','manual'].forEach(t => {
+    document.getElementById('tab-'+t).style.display = t===tab ? 'block' : 'none';
+  });
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  if(tab !== 'camera' && camStream) {
+    camStream.getTracks().forEach(t=>t.stop());
+    camStream = null;
+  }
+  resetPipeline();
 }
 
 function handleFile(file) {
   if(!file) return;
-  selectedFile = file;
   const reader = new FileReader();
   reader.onload = e => {
-    const img = document.getElementById('preview-img');
-    img.src = e.target.result; img.style.display='block';
+    const img = document.getElementById('previewImg');
+    img.src = e.target.result;
+    img.style.display = 'block';
+    img.onload = () => { selectedImg = img; };
     document.getElementById('dropZone').classList.add('has-image');
-    document.getElementById('scanBtn').disabled = false;
+    document.getElementById('scanUploadBtn').disabled = false;
   };
   reader.readAsDataURL(file);
 }
@@ -221,98 +430,333 @@ function handleDrop(e) {
   if(file && file.type.startsWith('image/')) handleFile(file);
 }
 
-async function scanPlate() {
-  if(!selectedFile) return;
-  showScanning();
-  const fd = new FormData();
-  fd.append('image', selectedFile);
-  try {
-    const res = await fetch('/api/anpr', {method:'POST', body:fd});
-    const data = await res.json();
-    hideScanning();
-    showResult(data);
-  } catch(e) {
-    hideScanning();
-    alert('Scan failed: ' + e.message);
-  }
-}
-
-async function simulateScan() {
-  showScanning();
-  const manual = document.getElementById('manualPlate')?.value?.trim() || '';
-  const fd = new FormData();
-  if(manual) fd.append('manual_plate', manual);
-  try {
-    const res = await fetch('/api/anpr', {method:'POST', body:fd});
-    const data = await res.json();
-    hideScanning();
-    showResult(data);
-  } catch(e) { hideScanning(); }
-}
-
 async function startCamera() {
   try {
-    stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});
+    camStream = await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment',width:{ideal:1280}}});
     const video = document.getElementById('cameraFeed');
-    video.srcObject = stream;
+    video.srcObject = camStream;
     video.style.display = 'block';
     document.getElementById('cameraOff').style.display = 'none';
   } catch(e) {
-    alert('Camera access denied. Use Upload or Simulate mode.');
+    showAlert('error','❌ Camera permission denied. Use Upload or Manual tab instead.');
   }
 }
 
-async function captureFrame() {
+async function captureAndScan() {
   const video = document.getElementById('cameraFeed');
-  if(!video.srcObject) { alert('Start camera first'); return; }
-  const canvas = document.createElement('canvas');
-  canvas.width = video.videoWidth; canvas.height = video.videoHeight;
-  canvas.getContext('2d').drawImage(video, 0, 0);
-  canvas.toBlob(async blob => {
-    showScanning();
-    const fd = new FormData(); fd.append('image', blob, 'capture.jpg');
-    try {
-      const res = await fetch('/api/anpr', {method:'POST', body:fd});
-      const data = await res.json();
-      hideScanning(); showResult(data);
-    } catch(e) { hideScanning(); }
-  }, 'image/jpeg', 0.9);
+  if(!camStream || !video.srcObject) { showAlert('error','❌ Start the camera first.'); return; }
+  capturedCanvas = document.createElement('canvas');
+  capturedCanvas.width  = video.videoWidth  || 640;
+  capturedCanvas.height = video.videoHeight || 480;
+  capturedCanvas.getContext('2d').drawImage(video, 0, 0);
+  const tempImg = new Image();
+  tempImg.src = capturedCanvas.toDataURL();
+  await new Promise(r => tempImg.onload = r);
+  selectedImg = tempImg;
+  runPipeline('camera');
 }
 
-function showScanning() {
-  document.getElementById('scanAnim').style.display = 'block';
-  document.getElementById('resultCard').style.display = 'none';
-}
-function hideScanning() {
-  document.getElementById('scanAnim').style.display = 'none';
-}
+// ════════════════════════════════════════════
+// PIPELINE
+// ════════════════════════════════════════════
+async function runPipeline(mode) {
+  resetAlert();
+  resetSteps();
+  pendingResult = null;
 
-function showResult(data) {
-  const card = document.getElementById('resultCard');
-  card.style.display = 'block';
-  document.getElementById('detectedPlate').textContent = data.detected_plate || '—';
-  document.getElementById('suggestedSlot').textContent = data.suggested_slot || 'None';
-  document.getElementById('methodLabel').textContent = data.method === 'ocr' ? 'OCR Detection' : 'AI Simulation';
-  document.getElementById('confidenceBadge').textContent = data.confidence || '—';
-  const proceedBtn = document.getElementById('proceedBtn');
-  if(data.detected_plate) {
-    proceedBtn.href = `/user?vehicle=${encodeURIComponent(data.detected_plate)}`;
+  // Manual entry skips CV steps
+  if(mode === 'manual') {
+    const raw = (document.getElementById('manualInput').value || '').toUpperCase().replace(/\s/g,'');
+    document.getElementById('manualInput').value = raw;
+    if(!raw) { showAlert('error','❌ Please enter a vehicle number.'); return; }
+    // Skip to format validation
+    setStep('vehicle','success','🚗','Skipped — manual entry');
+    setStep('plate','success','🔲','Skipped — manual entry');
+    setStep('ocr','success','🔤',`Plate entered: ${raw} (manual)`);
+    await runFormatAndDuplicate(raw, 100, 'manual');
+    return;
   }
-  // Add to history
-  scanHistory.unshift({plate:data.detected_plate, slot:data.suggested_slot, time:new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'}), method:data.method});
-  renderHistory();
+
+  if(!selectedImg && mode !== 'camera') { showAlert('warn','⚠️ Please select an image first.'); return; }
+
+  // ── Step 1: Vehicle Detection ──────────────
+  setStep('vehicle','active','<span class="spin">🔍</span>','Running COCO-SSD detection…');
+  await delay(0);
+
+  let detections = [];
+  if(modelsReady && detectorModel) {
+    try {
+      const imgEl = selectedImg;
+      detections = await detectorModel.detect(imgEl);
+    } catch(e) { console.error('Detection error:', e); }
+  } else {
+    // Models not loaded — allow manual override but warn
+    showAlert('warn','⚠️ AI models unavailable. Proceeding with OCR-only mode.');
+  }
+
+  const vehicleFound = detections.find(d =>
+    VEHICLE_CLASSES.includes(d.class) && d.score > 0.40
+  );
+
+  if(modelsReady && !vehicleFound) {
+    setStep('vehicle','failed','🚫','No vehicle detected');
+    setStep('plate','failed','🔲','Skipped — no vehicle');
+    setStep('ocr','failed','🔤','Skipped');
+    setStep('format','failed','📋','Skipped');
+    setStep('duplicate','failed','🔍','Skipped');
+    showAlert('error',
+      '🚫 <strong>No vehicle detected in this image.</strong><br>'+
+      'Ensure the image clearly shows a car, truck, motorcycle or bus. '+
+      'Printed sheets, phone screens and screenshots are not accepted.'
+    );
+    addHistory('—', '—', 'failed', mode);
+    return;
+  }
+
+  const vehicleLabel  = vehicleFound ? vehicleFound.class : 'vehicle';
+  const vehicleConf   = vehicleFound ? Math.round(vehicleFound.score * 100) : 100;
+  setStep('vehicle','success','🚗',`${vehicleLabel} detected — ${vehicleConf}% confidence`);
+
+  // ── Step 2: Plate Region ────────────────────
+  setStep('plate','active','<span class="spin">🔲</span>','Isolating plate region…');
+  await delay(100);
+
+  // Crop lower 40% of the vehicle bounding box (where plate typically is)
+  let plateCanvas = null;
+  if(vehicleFound) {
+    const [bx,by,bw,bh] = vehicleFound.bbox;
+    plateCanvas = document.createElement('canvas');
+    const plateH = Math.max(bh * 0.35, 40);
+    const plateY = by + bh * 0.6;
+    plateCanvas.width  = bw;
+    plateCanvas.height = plateH;
+    const ctx = plateCanvas.getContext('2d');
+    ctx.drawImage(selectedImg, bx, plateY, bw, plateH, 0, 0, bw, plateH);
+  }
+
+  setStep('plate','success','🔲','Plate region extracted');
+
+  // ── Step 3: OCR ─────────────────────────────
+  setStep('ocr','active','<span class="spin">🔤</span>','Running Tesseract OCR…');
+  await delay(50);
+
+  let ocrText = '', ocrConf = 0;
+  try {
+    const ocrTarget = plateCanvas || selectedImg;
+    const worker = await Tesseract.createWorker('eng', 1, {
+      logger: () => {}
+    });
+    await worker.setParameters({
+      tessedit_char_whitelist: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789',
+      preserve_interword_spaces: '0',
+    });
+    const { data } = await worker.recognize(ocrTarget);
+    ocrText = (data.text || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+    ocrConf = Math.round(data.confidence || 0);
+    await worker.terminate();
+  } catch(e) {
+    console.error('OCR error:', e);
+    ocrConf = 0;
+    ocrText = '';
+  }
+
+  if(ocrConf < CONFIDENCE_THRESHOLD && ocrText.length > 0) {
+    setStep('ocr','failed','🔤',`Confidence ${ocrConf}% — below ${CONFIDENCE_THRESHOLD}% threshold`);
+    setStep('format','failed','📋','Skipped');
+    setStep('duplicate','failed','🔍','Skipped');
+    showAlert('warn',
+      `⚠️ <strong>Low OCR confidence (${ocrConf}%).</strong><br>`+
+      `Minimum required is ${CONFIDENCE_THRESHOLD}%. Please reposition the vehicle for a clearer image of the plate.`
+    );
+    addHistory('—', '—', 'low_conf', mode);
+    return;
+  }
+
+  if(!ocrText || ocrText.length < 6) {
+    setStep('ocr','failed','🔤','No readable text found');
+    setStep('format','failed','📋','Skipped');
+    setStep('duplicate','failed','🔍','Skipped');
+    showAlert('error',
+      '❌ <strong>No plate text could be extracted.</strong><br>'+
+      'Try a higher-quality image with the plate clearly visible and well-lit.'
+    );
+    addHistory('—', '—', 'no_text', mode);
+    return;
+  }
+
+  setStep('ocr','success','🔤',`"${ocrText}" — confidence ${ocrConf}%`);
+  await runFormatAndDuplicate(ocrText, ocrConf, mode === 'camera' ? 'camera' : 'ocr');
 }
 
-function renderHistory() {
+// ── Steps 4 + 5 shared between OCR and manual mode ──────────
+async function runFormatAndDuplicate(rawText, confidence, method) {
+  // ── Step 4: Format Validation ───────────────
+  setStep('format','active','<span class="spin">📋</span>','Checking Indian plate format…');
+  await delay(80);
+
+  // Extract valid Indian plate from OCR noise
+  const matches = rawText.match(INDIAN_PLATE_RE);
+  const plate    = matches ? matches[0] : null;
+
+  if(!plate) {
+    setStep('format','failed','📋',`"${rawText}" — invalid format`);
+    setStep('duplicate','failed','🔍','Skipped');
+    showAlert('error',
+      '❌ <strong>Invalid number plate format.</strong><br>'+
+      `Detected text: <code>${rawText || 'none'}</code><br>`+
+      'Expected Indian format: <code>XX00XX0000</code> (e.g. KA01AB1234, MH12CD5678). '+
+      'Printed sheets and screenshots are rejected.'
+    );
+    addHistory(rawText, '—', 'bad_format', method);
+    return;
+  }
+
+  setStep('format','success','📋',`${plate} — valid Indian plate ✓`);
+
+  // ── Step 5: Duplicate Check ──────────────────
+  setStep('duplicate','active','<span class="spin">🔍</span>',`Checking if ${plate} is already parked…`);
+  await delay(0);
+
+  let dupData = { already_parked: false };
+  try {
+    const r = await fetch(`/api/check-vehicle/${encodeURIComponent(plate)}`);
+    dupData = await r.json();
+  } catch(e) { console.error('Duplicate check error:', e); }
+
+  if(dupData.already_parked) {
+    setStep('duplicate','failed','🔍',`Already parked at slot ${dupData.slot}`);
+    showAlert('error',
+      `🚗 <strong>Vehicle already parked.</strong><br>`+
+      `${plate} is currently occupying <strong>Slot ${dupData.slot}</strong> (Zone ${dupData.zone}). `+
+      `Entry time: ${dupData.entry_time}.<br>Process exit first before re-entry.`
+    );
+    addHistory(plate, dupData.slot, 'duplicate', method);
+    return;
+  }
+
+  setStep('duplicate','success','🔍','Not currently parked — clear for entry');
+
+  // Get AI slot suggestion
+  let suggestedSlot = '—';
+  try {
+    const sr = await fetch('/api/suggest-slot');
+    const sd = await sr.json();
+    suggestedSlot = sd.label || '—';
+  } catch(_) {}
+
+  pendingResult = { plate, confidence, method, suggestedSlot };
+  addHistory(plate, suggestedSlot, 'ok', method);
+  showConfirm();
+}
+
+// ════════════════════════════════════════════
+// CONFIRMATION DIALOG
+// ════════════════════════════════════════════
+function showConfirm() {
+  if(!pendingResult) return;
+  document.getElementById('confirmPlate').textContent = pendingResult.plate;
+  document.getElementById('confirmConf').textContent  =
+    pendingResult.method === 'manual'
+      ? 'Manual entry — verified by operator'
+      : `OCR Confidence: ${pendingResult.confidence}%`;
+  document.getElementById('confirmOverlay').style.display = 'flex';
+}
+
+function rejectConfirm() {
+  document.getElementById('confirmOverlay').style.display = 'none';
+  pendingResult = null;
+  resetPipeline();
+  showAlert('warn','↩ Scan rejected. Please rescan the vehicle.');
+}
+
+function acceptConfirm() {
+  document.getElementById('confirmOverlay').style.display = 'none';
+  if(!pendingResult) return;
+  showFinalResult(pendingResult.plate, pendingResult.confidence, pendingResult.method, pendingResult.suggestedSlot);
+}
+
+// ════════════════════════════════════════════
+// FINAL RESULT
+// ════════════════════════════════════════════
+function showFinalResult(plate, conf, method, slot) {
+  document.getElementById('r-plate').textContent = plate;
+  document.getElementById('r-slot').textContent  = '🅿 ' + slot;
+  document.getElementById('r-conf-badge').textContent = method === 'manual' ? 'Manual' : `${conf}% OCR`;
+  document.getElementById('r-method').textContent = {
+    ocr:'OCR + Vehicle Detection', camera:'Camera Capture + OCR', manual:'Manual Entry'
+  }[method] || method;
+  const parkBtn = document.getElementById('r-park-btn');
+  parkBtn.href = `/user?vehicle=${encodeURIComponent(plate)}`;
+  document.getElementById('resultPanel').style.display = 'block';
+  document.getElementById('resultPanel').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+// ════════════════════════════════════════════
+// HELPERS
+// ════════════════════════════════════════════
+function setStep(id, state, icon, val) {
+  const el = document.getElementById(`ps-${id}`);
+  const ic = document.getElementById(`ps-${id}-icon`);
+  const vl = document.getElementById(`ps-${id}-val`);
+  if(!el) return;
+  const stateMap = { active:'active', success:'success', failed:'failed', waiting:'waiting' };
+  el.className = 'pipeline-step ' + (stateMap[state] || '');
+  const iconMap = { active:'si-active', success:'si-ok', failed:'si-fail', waiting:'si-idle' };
+  ic.className = 'step-icon ' + (iconMap[state] || 'si-idle');
+  ic.innerHTML = icon;
+  vl.innerHTML = val;
+}
+
+function resetSteps() {
+  ['vehicle','plate','ocr','format','duplicate'].forEach(id => {
+    setStep(id, 'waiting',
+      {vehicle:'🚗',plate:'🔲',ocr:'🔤',format:'📋',duplicate:'🔍'}[id],
+      {vehicle:'Awaiting image…',plate:'Pending vehicle detection',ocr:'Pending plate region',format:'Pending OCR',duplicate:'Pending validation'}[id]
+    );
+  });
+}
+
+function resetPipeline() {
+  resetSteps();
+  resetAlert();
+  pendingResult = null;
+  document.getElementById('resultPanel').style.display = 'none';
+  const img = document.getElementById('previewImg');
+  img.style.display = 'none'; img.src = '';
+  document.getElementById('dropZone').classList.remove('has-image');
+  document.getElementById('scanUploadBtn').disabled = !modelsReady;
+  selectedImg = null;
+}
+
+function showAlert(type, html) {
+  const el = document.getElementById('alertBox');
+  const cls = {error:'alert-box alert-error', warn:'alert-box alert-warn', ok:'alert-box alert-ok'}[type] || 'alert-box alert-error';
+  el.className = cls;
+  el.innerHTML = `<span style="font-size:1.2rem;flex-shrink:0;">${type==='error'?'❌':type==='warn'?'⚠️':'✅'}</span><div>${html}</div>`;
+  el.style.display = 'flex';
+  el.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function resetAlert() {
+  const el = document.getElementById('alertBox');
+  el.style.display = 'none'; el.innerHTML = '';
+}
+
+function addHistory(plate, slot, status, method) {
+  scanHistory.unshift({ plate, slot, status, method, time: new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'}) });
   const el = document.getElementById('scanHistory');
-  if(!scanHistory.length) { el.innerHTML='<div style="text-align:center;padding:20px;color:#64748b;font-size:.85rem">No scans yet</div>'; return; }
-  el.innerHTML = scanHistory.slice(0,5).map(s => `
+  const statusIcon = {ok:'✅',failed:'❌',low_conf:'⚠️',bad_format:'🚫',duplicate:'🔁',no_text:'❌'}[status] || '—';
+  el.innerHTML = scanHistory.slice(0,6).map(s => `
     <div class="history-item">
-      <div style="font-size:1.2rem">${s.method==='ocr'?'📷':'🎲'}</div>
-      <div style="flex:1"><div class="history-plate">${s.plate}</div><div style="font-size:.72rem;color:#64748b;margin-top:2px">${s.time} · Slot ${s.slot}</div></div>
-      <a href="/user?vehicle=${encodeURIComponent(s.plate)}" style="font-size:.72rem;color:#60a5fa;text-decoration:none;padding:4px 10px;border:1px solid rgba(59,130,246,.25);border-radius:6px;">Park</a>
+      <span style="font-size:1.1rem;">${statusIcon}</span>
+      <div style="flex:1;min-width:0;">
+        <div class="history-plate" style="overflow:hidden;text-overflow:ellipsis;">${s.plate || '—'}</div>
+        <div style="font-size:.7rem;color:#64748b;margin-top:2px;">${s.time} · ${s.method} · Slot ${s.slot}</div>
+      </div>
+      ${s.status==='ok'?`<a href="/user?vehicle=${encodeURIComponent(s.plate)}" style="font-size:.7rem;color:#60a5fa;text-decoration:none;padding:3px 9px;border:1px solid rgba(59,130,246,.25);border-radius:6px;flex-shrink:0;">Park</a>`:''}
     </div>`).join('');
 }
+
+function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
 </script>
 </body>
 </html>

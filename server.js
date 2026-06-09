@@ -73,6 +73,35 @@ async function initDB() {
     value TEXT
   )`);
 
+  // Migration: remove UNIQUE constraint on phone if it exists (legacy schema)
+  try {
+    const idxList = await dbAll(`PRAGMA index_list(parking)`);
+    for (const idx of idxList) {
+      if (!idx.unique) continue;
+      const idxCols = await dbAll(`PRAGMA index_info(${idx.name})`);
+      if (idxCols.some(c => c.name === 'phone')) {
+        // Recreate the table without the bad constraint
+        await dbRun(`CREATE TABLE IF NOT EXISTS parking_fix (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          name TEXT NOT NULL,
+          phone TEXT,
+          vehicle TEXT,
+          slot INTEGER,
+          zone TEXT,
+          slot_label TEXT,
+          entry_time TEXT,
+          exit_time TEXT,
+          amount_charged REAL
+        )`);
+        await dbRun(`INSERT OR IGNORE INTO parking_fix SELECT id, name, phone, vehicle, slot, zone, slot_label, entry_time, exit_time, amount_charged FROM parking`);
+        await dbRun(`DROP TABLE parking`);
+        await dbRun(`ALTER TABLE parking_fix RENAME TO parking`);
+        console.log("✅ Removed UNIQUE constraint from parking.phone");
+        break;
+      }
+    }
+  } catch (_) {}
+
   // Migrations — add missing columns if needed
   const cols = await dbAll(`PRAGMA table_info(parking)`);
   const colNames = cols.map(c => c.name);
@@ -1011,13 +1040,13 @@ app.get("/history", requireAdmin, async (req, res) => {
       <a href="/logout" style="display:flex;align-items:center;gap:10px;color:#f87171;text-decoration:none;padding:12px 16px;border-radius:12px;font-size:.9rem;font-weight:500;border:1px solid rgba(239,68,68,.15);background:rgba(239,68,68,.05);">⏻ Logout</a>
     </div>
   </div>
-  <div class="main" style="position:relative;z-index:1;overflow-y:auto;">
+  <div class="main">
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;margin-bottom:28px;">
       <div><h1 style="font-size:1.9rem;font-weight:900;letter-spacing:-.03em">📜 Parking History</h1>
       <p style="color:#94a3b8;margin-top:4px">All ${rows.length} parking records</p></div>
       <a href="/api/export/csv" style="display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:10px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.25);color:#34d399;text-decoration:none;font-size:.85rem;font-weight:600;">⬇ Export CSV</a>
     </div>
-    <div style="background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.07);border-radius:20px;overflow:hidden;">
+    <div class="table-wrap" style="background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.07);border-radius:20px;">
     <table class="table">
     <thead><tr>
       <th>ID</th><th>Name</th><th>Vehicle</th><th>Slot</th><th>Zone</th>
@@ -1081,10 +1110,10 @@ app.get("/reservations", requireAdmin, async (req, res) => {
       <a href="/logout" style="display:flex;align-items:center;gap:10px;color:#f87171;text-decoration:none;padding:12px 16px;border-radius:12px;font-size:.9rem;font-weight:500;border:1px solid rgba(239,68,68,.15);background:rgba(239,68,68,.05);">⏻ Logout</a>
     </div>
   </div>
-  <div class="main" style="position:relative;z-index:1;overflow-y:auto;">
+  <div class="main">
     <div style="margin-bottom:28px;"><h1 style="font-size:1.9rem;font-weight:900;letter-spacing:-.03em">📋 Staff Reservations</h1>
     <p style="color:#94a3b8;margin-top:4px">${rows.length} active reservations</p></div>
-    <div style="background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.07);border-radius:20px;overflow:hidden;">
+    <div class="table-wrap" style="background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.07);border-radius:20px;">
     <table class="table"><thead><tr>
       <th>ID</th><th>Employee ID</th><th>Name</th><th>Vehicle</th><th>Slot</th><th>Zone</th><th>Date</th><th>Action</th>
     </tr></thead><tbody>`;
@@ -1320,6 +1349,26 @@ app.post("/api/clear-demo", requireAdmin, async (req, res) => {
 app.get("/api/suggest-slot", async (req, res) => {
   const slot = await getNextSlotSmart();
   res.json({ slot, label: slot ? slotToLabel(slot) : null, zone: slot ? slotToZone(slot) : null });
+});
+
+// Check if a vehicle is currently parked (for ANPR duplicate detection)
+app.get("/api/check-vehicle/:vehicle", async (req, res) => {
+  try {
+    const vehicle = req.params.vehicle.toUpperCase().replace(/\s/g, "");
+    const row = await dbGet(
+      `SELECT id, slot, zone, slot_label, entry_time FROM parking WHERE vehicle=? AND exit_time IS NULL`,
+      [vehicle]
+    );
+    if (row) {
+      const slotLabel = row.slot_label || slotToLabel(row.slot);
+      const zone      = row.zone      || slotToZone(row.slot);
+      res.json({ already_parked: true, slot: slotLabel, zone, entry_time: row.entry_time });
+    } else {
+      res.json({ already_parked: false });
+    }
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
 });
 
 // Settings API
