@@ -170,6 +170,18 @@ function slotToZone(n) {
   return "A";
 }
 
+function escapeHtml(str) {
+  if (str === null || str === undefined) return "";
+
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+
 async function getSettings() {
   const rows = await dbAll(`SELECT key, value FROM settings`);
   const s = {};
@@ -404,7 +416,7 @@ async function getAnomalies() {
         hours_parked: Math.round(hours * 10) / 10,
         type: "long_stay",
         severity: hours >= 24 ? "critical" : "warning",
-        message: `${row.vehicle} parked ${Math.round(hours * 10) / 10}h — exceeds ${threshold}h threshold (Slot ${label})`,
+        message: `${escapeHtml(row.vehicle)} parked ${Math.round(hours * 10) / 10}h — exceeds ${threshold}h threshold (Slot ${label})`,
       });
     }
   }
@@ -696,15 +708,15 @@ app.post("/submit", async (req, res) => {
   <div class="info-grid">
     <div class="info-item">
       <div class="info-lbl">Name</div>
-      <div class="info-val">${name}</div>
+      <div class="info-val">${escapeHtml(name)}</div>
     </div>
     <div class="info-item">
       <div class="info-lbl">Vehicle</div>
-      <div class="info-val">${vehicle.toUpperCase()}</div>
+      <div class="info-val">${escapeHtml(vehicle.toUpperCase())}</div>
     </div>
     <div class="info-item">
       <div class="info-lbl">Phone</div>
-      <div class="info-val">${phone || "—"}</div>
+      <div class="info-val">${escapeHtml(phone) || "—"}</div>
     </div>
     <div class="info-item">
       <div class="info-lbl">Entry Time</div>
@@ -802,12 +814,12 @@ app.post("/exitVehicle", async (req, res) => {
   </div>
 
   <div class="info-grid">
-    <div class="info-item"><div class="info-lbl">Vehicle</div><div class="info-val">${vehicle}</div></div>
+    <div class="info-item"><div class="info-lbl">Vehicle</div><div class="info-val">${escapeHtml(vehicle)}</div></div>
     <div class="info-item"><div class="info-lbl">Slot</div><div class="info-val">${slotLabel} · Zone ${zone}</div></div>
     <div class="info-item"><div class="info-lbl">Entry</div><div class="info-val" style="font-size:.85rem;">${row.entry_time}</div></div>
     <div class="info-item"><div class="info-lbl">Exit</div><div class="info-val" style="font-size:.85rem;">${now.toLocaleString("en-IN")}</div></div>
     <div class="info-item"><div class="info-lbl">Rate</div><div class="info-val">₹${settings.hourly_rate}/hr</div></div>
-    <div class="info-item"><div class="info-lbl">Name</div><div class="info-val">${row.name}</div></div>
+    <div class="info-item"><div class="info-lbl">Name</div><div class="info-val">${escapeHtml(row.name)}</div></div>
   </div>
 
   <div class="btn-row" style="margin-top:20px;">
@@ -872,8 +884,8 @@ app.post("/searchVehicle", async (req, res) => {
     <div style="font-size:.82rem;color:#64748b;">Zone ${zone} · Currently Parked</div>
   </div>
   <div class="info-grid">
-    <div class="info-item"><div class="info-lbl">Name</div><div class="info-val">${row.name}</div></div>
-    <div class="info-item"><div class="info-lbl">Vehicle</div><div class="info-val">${row.vehicle}</div></div>
+    <div class="info-item"><div class="info-lbl">Name</div><div class="info-val">${escapeHtml(row.name)}</div></div>
+    <div class="info-item"><div class="info-lbl">Vehicle</div><div class="info-val">${escapeHtml(row.vehicle)}</div></div>
     <div class="info-item"><div class="info-lbl">Duration</div><div class="info-val">${hours}h ${mins}m</div></div>
     <div class="info-item"><div class="info-lbl">Est. Bill</div><div class="info-val" style="color:#6ee7b7;">₹${amount}</div></div>
     <div class="info-item" style="grid-column:1/-1;"><div class="info-lbl">Entry Time</div><div class="info-val">${row.entry_time}</div></div>
@@ -1087,12 +1099,14 @@ app.get("/history", requireAdmin, async (req, res) => {
       ? `<span class="badge-red">Exited</span>`
       : `<span class="badge-green">Active</span>`;
     html += `<tr>
-      <td>${row.id}</td><td>${row.name}</td><td style="font-weight:700;color:#60a5fa">${row.vehicle}</td>
+      <td>${row.id}</td><td>${escapeHtml(row.name)}</td><td style="font-weight:700;color:#60a5fa">${escapeHtml(row.vehicle)}</td>
       <td style="font-weight:700;color:#93c5fd">${label}</td><td>${zone}</td>
       <td>${row.entry_time || "—"}</td><td>${row.exit_time || "—"}</td>
       <td>${duration}</td><td style="color:#6ee7b7;font-weight:700">${bill}</td>
       <td>${status}</td>
-      <td><a class="delete-btn" href="/delete/${row.id}">🗑 Delete</a></td>
+      <td><form action="/delete/${row.id}" method="POST" style="display:inline;">
+  <button type="submit" class="delete-btn">🗑 Delete</button>
+</form></td>
     </tr>`;
   }
 
@@ -1143,11 +1157,13 @@ app.get("/reservations", requireAdmin, async (req, res) => {
     const label = row.slot_label || slotToLabel(row.slot);
     const zone = row.zone || slotToZone(row.slot);
     html += `<tr>
-      <td>${row.id}</td><td style="color:#fcd34d;font-weight:700">${row.employee_id}</td>
-      <td>${row.name}</td><td style="color:#60a5fa;font-weight:700">${row.vehicle}</td>
-      <td style="color:#93c5fd;font-weight:700">${label}</td><td>${zone}</td>
+      <td>${row.id}</td><td style="color:#fcd34d;font-weight:700"><td>${escapeHtml(row.employee_id)}</td></td>
+      <td>${escapeHtml(row.name)}</td>
+      <td style="font-weight:700;color:#60a5fa">${escapeHtml(row.vehicle)}</td>>
       <td>${row.reservation_date || "—"}</td>
-      <td><a class="delete-btn" href="/deleteReservation/${row.id}">🗑 Cancel</a></td>
+      <td><form action="/deleteReservation/${row.id}" method="POST" style="display:inline;">
+  <button type="submit" class="delete-btn">🗑 Cancel</button>
+</form></td>
     </tr>`;
   }
 
@@ -1155,12 +1171,12 @@ app.get("/reservations", requireAdmin, async (req, res) => {
   res.send(html);
 });
 
-app.get("/delete/:id", requireAdmin, async (req, res) => {
+app.post("/delete/:id", requireAdmin, async (req, res) => {
   await dbRun(`DELETE FROM parking WHERE id=?`, [req.params.id]);
   res.redirect("/history");
 });
 
-app.get("/deleteReservation/:id", requireAdmin, async (req, res) => {
+app.post("/deleteReservation/:id", requireAdmin, async (req, res) => {
   await dbRun(`DELETE FROM reservations WHERE id=?`, [req.params.id]);
   res.redirect("/reservations");
 });
@@ -1286,7 +1302,7 @@ app.get("/api/export/csv", requireAdmin, async (req, res) => {
       const { duration } = calculateBill(row.entry_time, row.exit_time, settings.hourly_rate, settings.daily_rate);
       dur = duration;
     }
-    csv += `${row.id},"${row.name}","${row.phone || ""}","${row.vehicle}","${label}","${zone}","${row.entry_time || ""}","${row.exit_time || ""}","${dur}","${row.amount_charged || ""}"\n`;
+    csv += `${row.id},"${escapeHtml(row.name)}","${row.phone || ""}","${escapeHtml(row.vehicle)}","${label}","${zone}","${row.entry_time || ""}","${row.exit_time || ""}","${dur}","${row.amount_charged || ""}"\n`;
   }
   res.setHeader("Content-Type", "text/csv");
   res.setHeader("Content-Disposition", `attachment; filename="parking_export_${new Date().toISOString().slice(0,10)}.csv"`);
