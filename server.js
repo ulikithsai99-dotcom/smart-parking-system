@@ -1009,6 +1009,40 @@ req.session.save(err => {
     res.redirect("/dashboard");
 });
 
+app.post("/adminLogin", async (req, res) => {
+    const { username, password } = req.body;
+
+    const admin = await dbGet(
+        `SELECT * FROM admin WHERE username=?`,
+        [username]
+    );
+
+    if (!admin) {
+        return res.redirect("/admin?error=invalid");
+    }
+
+    const passwordMatch = await bcrypt.compare(password, admin.password);
+
+    if (!passwordMatch) {
+        return res.redirect("/admin?error=invalid");
+    }
+
+    req.session.admin = true;
+    req.session.username = username;
+
+    req.session.save(err => {
+        if (err) {
+            console.error("Session save failed:", err);
+            return res.status(500).send("Session save failed");
+        }
+
+        console.log("Session ID after login:", req.sessionID);
+        console.log("Session:", req.session);
+
+        res.redirect("/dashboard");
+    });
+});   // <-- THIS WAS MISSING
+
 app.get("/logout", (req, res) => {
   req.session.destroy();
   res.redirect("/admin");
