@@ -1165,10 +1165,6 @@ app.get("/deleteReservation/:id", requireAdmin, async (req, res) => {
   res.redirect("/reservations");
 });
 
-app.get("/resetAdmin", async (req, res) => {
-  await dbRun(`DELETE FROM admin`);
-  res.json({ ok: true, message: "Admin accounts cleared" });
-});
 
 // ═══════════════════════════════════════════════
 // API ENDPOINTS
