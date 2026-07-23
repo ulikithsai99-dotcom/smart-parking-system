@@ -634,10 +634,16 @@ app.get("/admin", (req, res) => {
   res.sendFile(path.join(__dirname, "views", "admin.html"));
 });
 function requireAdmin(req, res, next) {
-  if (!req.session.admin) return res.redirect("/admin");
-  next();
-}
+    console.log("Dashboard Session ID:", req.sessionID);
+    console.log("Dashboard Session:", req.session);
 
+    if (!req.session.admin) {
+        console.log("No admin session!");
+        return res.redirect("/admin");
+    }
+
+    next();
+}
 app.get("/dashboard", requireAdmin, (req, res) =>
   res.sendFile(path.join(__dirname, "views", "dashboard.html"))
 );
@@ -993,9 +999,12 @@ req.session.username = username;
 
 req.session.save(err => {
     if (err) {
-        console.error(err);
+        console.error("Session save failed:", err);
         return res.status(500).send("Session save failed");
     }
+
+    console.log("Session ID after login:", req.sessionID);
+    console.log("Session:", req.session);
 
     res.redirect("/dashboard");
 });
