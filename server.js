@@ -5,6 +5,8 @@ const path = require("path");
 const session = require("express-session");
 const fs = require("fs");
 const math = { ceil: Math.ceil, floor: Math.floor };
+const bcrypt = require("bcryptjs");
+
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -917,8 +919,15 @@ app.post("/reserveSlot", async (req, res) => {
 
 app.post("/createAdmin", async (req, res) => {
   const { username, password } = req.body;
+
   try {
-    await dbRun(`INSERT INTO admin (username, password) VALUES (?, ?)`, [username, password]);
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    await dbRun(
+      `INSERT INTO admin (username, password) VALUES (?, ?)`,
+      [username, hashedPassword]
+    );
+
     res.redirect("/admin?created=1");
   } catch (_) {
     res.redirect("/admin?error=exists");
@@ -927,13 +936,25 @@ app.post("/createAdmin", async (req, res) => {
 
 app.post("/adminLogin", async (req, res) => {
   const { username, password } = req.body;
+
   const admin = await dbGet(
-    `SELECT * FROM admin WHERE username=? AND password=?`,
-    [username, password]
+    `SELECT * FROM admin WHERE username=?`,
+    [username]
   );
-  if (!admin) return res.redirect("/admin?error=invalid");
+
+  if (!admin) {
+    return res.redirect("/admin?error=invalid");
+  }
+
+  const passwordMatch = await bcrypt.compare(password, admin.password);
+
+  if (!passwordMatch) {
+    return res.redirect("/admin?error=invalid");
+  }
+
   req.session.admin = true;
   req.session.username = username;
+
   res.redirect("/dashboard");
 });
 
