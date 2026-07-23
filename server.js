@@ -976,7 +976,7 @@ app.post("/createAdmin", async (req, res) => {
   }
 });
 
-app.post("/adminLogin", adminLoginLimiter, async (req, res) => {
+app.post("/adminLogin", async (req, res) => {
   const { username, password } = req.body;
 
   const admin = await dbGet(
