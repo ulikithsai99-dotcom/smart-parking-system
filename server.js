@@ -11,6 +11,7 @@ const helmet = require("helmet");
 
 
 const app = express();
+app.set("trust proxy", 1);
 const PORT = process.env.PORT || 5000;
 app.use(
   helmet({
@@ -25,6 +26,9 @@ app.use(
     secret: process.env.SESSION_SECRET || "smartparking_secret_2024",
     resave: false,
     saveUninitialized: false,
+
+    proxy: true,
+
     cookie: {
       maxAge: 8 * 60 * 60 * 1000,
       httpOnly: true,
