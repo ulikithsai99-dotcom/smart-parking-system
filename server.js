@@ -626,10 +626,13 @@ app.get("/search", (req, res) =>
 app.get("/reserve", (req, res) =>
   res.sendFile(path.join(__dirname, "views", "reserve.html"))
 );
-app.get("/admin", (req, res) =>
-  res.sendFile(path.join(__dirname, "views", "admin.html"))
-);
+app.get("/admin", (req, res) => {
+  if (req.session.admin) {
+    return res.redirect("/dashboard");
+  }
 
+  res.sendFile(path.join(__dirname, "views", "admin.html"));
+});
 function requireAdmin(req, res, next) {
   if (!req.session.admin) return res.redirect("/admin");
   next();
