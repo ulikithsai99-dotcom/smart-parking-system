@@ -6,10 +6,17 @@ const session = require("express-session");
 const fs = require("fs");
 const math = { ceil: Math.ceil, floor: Math.floor };
 const bcrypt = require("bcryptjs");
+const rateLimit = require("express-rate-limit");
+const helmet = require("helmet");
 
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+app.use(
+  helmet({
+    contentSecurityPolicy: false
+  })
+);
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -186,6 +193,11 @@ function escapeHtml(str) {
     .replace(/'/g, "&#39;");
 }
 
+const adminLoginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5,
+  message: "Too many login attempts. Please try again after 15 minutes."
+});
 
 async function getSettings() {
   const rows = await dbAll(`SELECT key, value FROM settings`);
@@ -951,7 +963,7 @@ app.post("/createAdmin", async (req, res) => {
   }
 });
 
-app.post("/adminLogin", async (req, res) => {
+app.post("/adminLogin", adminLoginLimiter, async (req, res) => {
   const { username, password } = req.body;
 
   const admin = await dbGet(
