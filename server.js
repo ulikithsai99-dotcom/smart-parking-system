@@ -196,7 +196,7 @@ function escapeHtml(str) {
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#39;");
 }
-
+console.log("Admin login request received");
 const adminLoginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100,
@@ -989,9 +989,15 @@ app.post("/adminLogin", adminLoginLimiter, async (req, res) => {
   }
 
   req.session.admin = true;
-  req.session.username = username;
+req.session.username = username;
 
-  res.redirect("/dashboard");
+req.session.save(err => {
+    if (err) {
+        console.error(err);
+        return res.status(500).send("Session save failed");
+    }
+
+    res.redirect("/dashboard");
 });
 
 app.get("/logout", (req, res) => {
